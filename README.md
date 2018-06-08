@@ -4,7 +4,7 @@ This repository is a resources for attendees of the workshop hosted at PICI in J
 
 ## Repository content
 1.	Outline of instructions (below)
-2.	Debarcoded datafiles
+2.	Datasets from Science (2015) paper         !!!Blood and 1 of the bone marrow files to large?!!!
 3.	R codes
 
 ## Prior to beginning make sure download required R packages:
