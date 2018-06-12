@@ -8,14 +8,14 @@ This repository is a resources for attendees of the workshop hosted at PICI in J
 3.	R codes
 
 ## Prior to beginning make sure download required R packages:
-1. Premessa
-2. Scgraph
-3. Scfeatures
-4. Scaffold
-5. Rtsne
+1. [premessa](https://github.com/ParkerICI/premessa)
+2. [scgraphs](https://github.com/ParkerICI/scgraphsScgraph)
+3. [scfeatures](https://github.com/ParkerICI/scfeatures)
+4. [scaffold](https://github.com/nolanlab/scaffold)
+5. [Rtsne](https://github.com/jkrijthe/Rtsne)
 
 ## Introduction
-In this tutorial, we will go step-by-step covering methods to optimally visualize single cell data. The dataset we'll use as an example to go through these methods is from the a 2015 publication in Science (link, ref). After downloading the R packages listed above, the next step is to download the datasets from this repository.
+In this tutorial, we will go step-by-step covering methods to optimally visualize single cell data. The dataset we'll use as an example to go through these methods is from the a 2015 [publication in Science](http://science.sciencemag.org/content/349/6244/1259425). After downloading the R packages listed above, the next step is to download the datasets from this repository.
 
 ## Normalization
 * Bead based normalization using premessa package
