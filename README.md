@@ -11,6 +11,19 @@ This repository is a resource for PICI members performing end-to-end single-cell
 6. [scaffold](https://github.com/nolanlab/scaffold)
 7. [Rtsne](https://github.com/jkrijthe/Rtsne)
 
+**Install a C++ compiler**
+Some steps require a working C++ compiler for installation- please refer to the appropriate option depending on your system.
+
+#### Mac OSX
+You need to install the XCode software from Apple that is freely available on the App Store. Depending on the specific version of XCode you are using you might also need to install the "Command Line Tools" package separately. Please refer to the Documentation for your XCode version
+
+#### Windows
+Install the [Rtools](https://cran.r-project.org/bin/windows/Rtools/) package, which is required for building R packaged from sources
+
+#### Linux
+Install GCC. Refer to the documentation of your distribution to find the specific package name
+
+### Install R Packages
 To install these packages, open an R session and enter the following command lines:
 ```
 install.packages("devtools")
@@ -22,13 +35,14 @@ install.packages("premessa")
 
 install.packages("scgraphs")
 
-install.packages("scfeatures")
+library(devtools)
+devtools::install_github("ParkerICI/scfeatures")
 
-install.packages("scaffold")
+library(devtools)
+install_github("nolanlab/scaffold")
 
 install.packages("Rtsne")
 ```
-
 ## Usage
 In this tutorial, we will go step-by-step covering methods to optimally visualize single cell data. After downloading the [datasets](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) (from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) in _Science_), we will go through this method in order of the following general steps:
 
@@ -215,18 +229,121 @@ There are four types of visualization that allow you to inspect the results of t
 * Check data, clean to make sure doublets, dead cells and unwanted populations removed
 * Manually gated data will establish landmark nodes, for this use desired software system (we use Cell Engine)
 
-Cluster data 3 ways:
-* Cluster each sample independently
-* Pool all files then cluster--> extract features from each group of cells (like change in expression, fold change) and look at association with endpoint
-* Pool all files from a given tissue type and cluster
-
 # Visualization
+
 ## Unsupervised visualization 
 The first task is to get and idea of the structure of the sample— what cells are in there? How many different populations can we identify as a first pass? What are the markers combinations that define such populations? Rather than using standard dimension-reduction methods PCA or tSNE, both of which have limitations, we will use **Force-directed graphs** to achieve this.
 
 Like other graphical methods, **Force-directed graphs** (_cite_) offer flexibility of visulization, as each node represents one cell (or cluster of cells) and each edge represents similarity between cells which can correspond to a variety of distance metrics or functions, but for our purposes we will use cosine (_link scgraphs package_).  In this layout the edges act as springs, whose strength is proportional to the weight of the edge (i.e. the similarity between the nodes). The algorithm then proceeds as a physical simulation by pulling together nodes that are similar (i.e. are connected by strong springs), and repelling dissimilar nodes. The end result is a layout where groups of similar cells are located close on the page, exactly what we set out to do for our visualization. (_cite Zunder:2015gp, Levine:2015ew, Samusik:2016ev, Spitzer:2015jd_?}
 
 * Number of neighbours=15
+
+## Clustering
+Given our set of files, three modes of clustering are possible:
+* Cluster each file/sample independently
+* Pool all files from a given tissue type and cluster
+* Pool all files then cluster and extract features from each group of cells (like change in expression, fold change) and look at association with endpoint
+
+The choice in clustering here has important implications for feature generation and subsequent model building (more below).
+
+Our example input directory called `Bone_marrow` contains five files:
+```
+- BM_a_cells.fcs
+- BM_b_cells.fcs
+- BM_c_cells.fcs
+- BM_d_cells.fcs
+- BM_e_cells.fcs
+```
+If the choice was to run each sample independently, the following R code would apply:
+
+```R
+# These are the names of the columns in the FCS files that you want to use for clustering. 
+# The column descriptions from the FCS files are used as name when available (corresponding
+# to the $PxS FCS keyword). When descriptions are missing the channel names are used
+# instead ($PxN keyword)
+
+col.names <- c("(CD4)", "(CD8)", "(DNA1)")
+
+# Please refer to the documentation of this function for an explanation of the parameters
+# and for a description of the output type. The output is saved on disk, and the function
+# simply return the list of files that have been clustered
+cluster_fcs_files_in_dir("Bone_marrow", num.cores = 1, col.names = col.names, num.clusters = 200,
+    asinh.cofactor = 5, output.type = "directory")
+
+# You can also specify a list of files directly using the cluster_fcs_files function,
+# which takes essentially the same arguments
+files.list <- c("Bone_marrow/BM_a_cells.fcs", "Bone_marrow/BM_b_cells.fcs")
+cluster_fcs_files(files.list, num.cores = 1, col.names = col.names, num.clusters = 200,
+    asinh.cofactor = 5, output.type = "directory")
+```
+
+If instead you wanted to pool some files together, you would setup the run as follows
+
+```R
+# Assuming for instance that you wanted to pool BM_a_cells.fcs and BM_b_cells.fcs in group 1, and BM_c_cells.fcs, 
+# BM_d_cells.fcs & BM_e_cells.fcs in group 2 (once again please refer to the documentation for details)
+files.groups <- list(
+    group1 = c("Bone_marrow/ BM_a_cells.fcs", "Bone_marrow/ BM_b_cells.fcs")
+    group2 = c("Bone_marrow/ BM_c_cells.fcs", " BM_d_cells.fcs", " BM_e_cells.fcs"))
+
+cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
+    num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+```
+
+This can be done by tissue type (for example pooling lymph node and bone marrow files separately) or in whatever organization makes sense for your dataset.
+
+### Output
+
+Both clustering functions ouptut two types of data:
+- A summary table of per-cluster statistics
+- One or more RDS (R binary format) files containing cluster memberships for every cell event
+
+The details of the RDS output depend on the `output.type` option, please refer to the R documentation for more details. The summary table contains one row for each cluster, and one column for each channel in the original FCS files, with the table entries representing the median intensity of the channel in the corresponding cluster.
+
+If multiple files have been pooled together this table also contains columns in the form `CD4@BM_a_cells.fcs`, which contain the median expression of `CD4`, calculated only on the cells in that cluster that came from sample `BM_a_cells.fcs`
+
+### Features generation
+
+This package also contains functions to rearrange the clustering output to calculate cluster features that can be used to build a predictive model (similar to the approach used in the Citrus package). These functions operate on the clusters summary table described above, and require data to have been pooled together before clustering (i.e. the clustering should have been run with the `cluster_fcs_files_groups` function). In other words, if you want to build a model that includes data from the four files in the example above, you need to cluster them as a single group.
+
+The general approach for features generation for model building, is that you want to generate a table where each row represents a cluster feature (e.g. the abundance of a cluster, or the expression of a marker in a cluster), and each column represent an observation (e.g. a different sample), for which you have a categorical or continuous endpoint of interest that you want to predict using the cluster features.
+
+This package allows you to gather data that has been collected in multiple FCS files and, after clustering, integrate all the different pieces together to generate that matrix.
+
+The two main functions are (please refer to the R documentation for all the details):
+- `get_cluster_features`: this function takes a model specification and rearranges the clustering output to produce features that are suitable for model building
+- `multistep_normalize`: this function can be used to do complex normalization operations on the features
+
+ Suppose that you have the following dataset !!
+
+|file   |timepoint  |condition  |subject    |label  |tumor_size |
+|-------|-----------|-----------|-----------|-------|-----------|
+|A.fcs  |baseline   |stim1      |subject1   |R      |0.1        |
+|B.fcs  |baseline   |stim2      |subject1   |R      |0.1        |
+|C.fcs  |baseline   |unstim     |subject1   |R      |0.1        |
+|D.fcs  |week8      |stim1      |subject1   |R      |1.5        |
+|E.fcs  |week8      |stim2      |subject1   |R      |1.5        |
+|F.fcs  |week8      |unstim     |subject1   |R      |1.5        |
+|G.fcs  |baseline   |stim1      |subject2   |NR     |0.2        |
+|H.fcs  |baseline   |stim2      |subject2   |NR     |0.2        |
+|I.fcs  |baseline   |unstim     |subject2   |NR     |0.2        |
+|L.fcs  |week8      |stim1      |subject2   |NR     |3.2        |
+|M.fcs  |week8      |stim2      |subject2   |NR     |3.2        |
+|N.fcs  |week8      |unstim     |subjcet2   |NR     |3.2        |
+
+There are multiple way that you could envision leveraging this data for model construction. The two key parameters of `get_cluster_features` that allow you to specify different models are:
+- `predictors`: this specifies which variables are going to be used as predictors
+- `endpoint.grouping`: this specifies which variables are used to group together files that are associated with the same endpoint
+
+A few examples should clarify how to use this function
+
+#### Example model 1
+
+(create from our dataset?)
+
+
+
+
 
 ## Supervised visualization 
 * [Scaffold](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) method using [scaffold](https://github.com/nolanlab/scaffold) package
