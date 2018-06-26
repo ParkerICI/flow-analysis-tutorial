@@ -42,7 +42,7 @@ In this tutorial, we will go step-by-step covering methods to optimally visualiz
   
 
 ## Panel editing
-When you need to harmonize panels across a number of files, panel editing and renaming is useful so that they can be prepared for downstream analysis (most analysis tools expect files that are part of the same analysis to have identical panels). The [premessa](https://github.com/ParkerICI/premessa) package allows for such editing.
+When you need to harmonize panels across a number of files, panel editing and renaming is useful so that they can be prepared for downstream analysis (most analysis tools expect files that are part of the same analysis to have identical panels). The R package [premessa](https://github.com/ParkerICI/premessa) allows for such editing.
 
 (create a case from existing files where we'd have to apply this step)
 
@@ -59,10 +59,8 @@ To stop the software simply hit the "ESC" key in your R session.
 _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
 
-
 # Normalization
-There are several sources of variability in flow-based data, and normalization is an essential method in controlling such variability. [Bead-based normalization](https://www.ncbi.nlm.nih.gov/pubmed/23512433) provides several advantages, as it controls variability over time and 
-
+There are several sources of variability in flow-based data, and normalization is an essential method in controlling such variability. [Bead-based normalization](https://www.ncbi.nlm.nih.gov/pubmed/23512433) provides several advantages, as it controls variability over time uniquely for each event and accounts for instrument sensitivity changes in the short- and long- term.
 
 You can start the normalizer GUI by typing the following commands in your R session:
 
