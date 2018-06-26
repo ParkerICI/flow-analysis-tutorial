@@ -55,6 +55,8 @@ paneleditor_GUI()
 ```
 This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory containing the data you want to analyze, and select any file in that directory. The directory itself will then become the working directory for the software.
 
+![screen shot 2018-06-26 at 1 35 36 pm](https://user-images.githubusercontent.com/36977003/41937690-dac216a8-7945-11e8-95f2-ff9ad3a9dd9c.png)
+
 To stop the software simply hit the "ESC" key in your R session.
 _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
@@ -106,34 +108,46 @@ library(premessa)
 normalizer_GUI()
 ```
 
-This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory containing the data you want to analyze, and select any file in that directory. In this example, select a file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets)dataset. The directory itself will then become the working directory for the software.
+This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory (computer location) containing the data you want to analyze, and select any file in that directory. In this example, select a file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets)dataset. The directory itself will then become the working directory for the software.
 
 **The GUI contains two tabs**:
 
-**1. Normalize data:** used for beads gating and normalization . ***!!! INSERT SCREENSHOTS***
+**1. Normalize data:** used for beads gating and normalization 
 
 This panel contains the following controls:
 
 - *Select beads type*: select the type of normalization beads that have been used for the experiment. Here we will use *Beta Beads (139, 141, 159, 175)*. The numbers indicate the beads channels used for normalization.
 - *Select FCS file*: the FCS  that is currently being visualized for gating. This dropdown will contain all the FCS files located in the working directory. The gating plots will appear under the row of buttons.
 - *Select baseline for normalization*: the baseline beads intensities to be used for normalization. You can either use the median beads intensities of the FCS files that you are currently using for normalization (*Current files* option), or the median intensities of an existing set of beads files (*Existing folder of beads files*). If you select the latter a file dialog window will pop-up when you select the option. Use the window to navigate to a directory containing FCS files containing beads events only (for instance the *BM_a_cells_beads.fcs* file in the above example) and select one of the files. The software will then load *all* the files contained in the same directory as the file you selected. The currently selected folder will be displayed in a text box on the right. 
-- *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots.
-- *Apply current gates to all files*: applies the current gates to all the files.
-- *Normalize*: starts the normalization routine. When the process is completed a confirmation dialog will appear
+![screen shot 2018-06-26 at 1 38 37 pm](https://user-images.githubusercontent.com/36977003/41937841-431a42ca-7946-11e8-9657-003f2cda5646.png)
 
+- *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots.
+![screen shot 2018-06-26 at 1 39 19 pm](https://user-images.githubusercontent.com/36977003/41937870-5c8aadee-7946-11e8-8256-21085d60a2c3.png)
+
+- *Apply current gates to all files*: applies the current gates to all the files.
+![screen shot 2018-06-26 at 1 39 54 pm](https://user-images.githubusercontent.com/36977003/41937909-71794288-7946-11e8-9fea-dc391ac7652e.png)
+
+- *Normalize*: starts the normalization routine. When the process is completed a confirmation dialog will appear.
 The workflow involves cycling through all the files (there are five of them- a through e in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization.
 
 You can cycle back and forth between different files, as the GUI will remember the gates you have selected for each file.
 
-**2. Remove beads**: used for beads removal . ***!!! INSERT SCREENSHOTS***
+**2. Remove beads**: used for beads removal 
 
-This panel has the following controls
+This panel has the following controls:
 
 - *Select beads type*: same as for the *Normalize data* panel: select the type of normalization beads that have been used for the experiment. In our example, we are using the Beta Beads option.
 - *Select FCS file*: select the FCS file for plotting. The dropdown will contain all the FCS files located in the *normed* sub-folder of the working directory. The plots will appear below the row of buttons. See below for a description of what the plots represent
-- *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. In our example we will use 4 as the cutoff.
+- *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. This requires looking at the data and chosing an appropriate cut point (orange=beads, blue=no beads)
+
+
+
 - *Remove beads (current file)*: use the current cutoff to remove beads from the currently selected file. When the process is completed a confirmation dialog will appear
+![screen shot 2018-06-26 at 2 07 53 pm](https://user-images.githubusercontent.com/36977003/41939347-5a67c124-794a-11e8-8a3c-e1a15bf3aedb.png)
+
 - *Remove beads (all files)*: use the current cutoff to remove beads from all the files in the folder (i.e. all the files that are listed in the *Select FCS file* dropdown). When the process is completed a confirmation dialog will appear
+ ![screen shot 2018-06-26 at 2 11 28 pm](https://user-images.githubusercontent.com/36977003/41939495-daa079a8-794a-11e8-970d-94a1ae2a665f.png)
+ 
  
 The bead removal procedure is based on the idea of looking at the distance between each event and the centroid of the beads population, and removing all the events that are closer than a given threshold to the beads population, and therefore are likely to represent beads as opposed to true cells.
 
