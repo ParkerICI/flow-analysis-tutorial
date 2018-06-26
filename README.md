@@ -138,16 +138,12 @@ This panel has the following controls:
 
 - *Select beads type*: same as for the *Normalize data* panel: select the type of normalization beads that have been used for the experiment. In our example, we are using the Beta Beads option.
 - *Select FCS file*: select the FCS file for plotting. The dropdown will contain all the FCS files located in the *normed* sub-folder of the working directory. The plots will appear below the row of buttons. See below for a description of what the plots represent
-- *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. This requires looking at the data and chosing an appropriate cut point (orange=beads, blue=no beads)
-
-
-
+- *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. This requires looking at the data and chosing an appropriate cut point (orange=beads, blue=no beads, more on this below)
 - *Remove beads (current file)*: use the current cutoff to remove beads from the currently selected file. When the process is completed a confirmation dialog will appear
 ![screen shot 2018-06-26 at 2 07 53 pm](https://user-images.githubusercontent.com/36977003/41939347-5a67c124-794a-11e8-8a3c-e1a15bf3aedb.png)
 
 - *Remove beads (all files)*: use the current cutoff to remove beads from all the files in the folder (i.e. all the files that are listed in the *Select FCS file* dropdown). When the process is completed a confirmation dialog will appear
  ![screen shot 2018-06-26 at 2 11 28 pm](https://user-images.githubusercontent.com/36977003/41939495-daa079a8-794a-11e8-970d-94a1ae2a665f.png)
- 
  
 The bead removal procedure is based on the idea of looking at the distance between each event and the centroid of the beads population, and removing all the events that are closer than a given threshold to the beads population, and therefore are likely to represent beads as opposed to true cells.
 
@@ -159,19 +155,61 @@ The plots in the bottom half of the panel help you select an appropriate cutoff.
 
 To stop the software simply hit the "ESC" key in your R session. _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
-
 # De-barcoding
-* De-barcoding steps also contained in [premessa](https://github.com/ParkerICI/premessa) package
-* Use excel file titled "ScienceDataset_DebarcodedKey" in the [Science datasets](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) folder
-* Based on the distance between positive and negative channels
-* Check barcoding worked by viewing summary plots of barcode yields
+Combinatorial barcoding allows for identifying and removing errors from your dataset. For cell doublets to be identified and removed from the analysis. [This paper](https://www.ncbi.nlm.nih.gov/pubmed/25612231) describes the concept of applying single cell-based debarcoding algorithms and it's advantages over population-based methods in terms of allowing for rapid and unbiased sample deconvolution.
+
+Assuming the FCS file *BM_a_cells.fcs* is located in the directory *Bone_marrow*, and the barcode key defines 3 barcoded populations (A, B, C), the following directories and output files will be created at the end of the debarcoding process:
+
+```
+Bone_marrow
+|--- BM_a_cells.fcs
+|--- debarcoded
+     |--- BM_a_cells.A.fcs.fcs
+     |--- BM_a_cells.B.fcs.fcs
+     |--- BM_a_cells.C.fcs
+     |--- BM_a_cells_Unassigned.fcs
+```
 
 ### Starting the de-barcoding GUI and selecting the working directory and example data
+You can start the de-barcoding GUI by typing the following commands in your R session:
 
 ```
 library(premessa)
 debarcoding_GUI()
 ```
+
+Upon launching the GUI you will have access to the following controls:
+
+- *Current barcode key*: the CSV file containing the barcode key. To upload the key to follow our example dataset, press the *Select key* button and select the [file](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets).
+![screen shot 2018-06-26 at 2 54 08 pm](https://user-images.githubusercontent.com/36977003/41941422-ce225790-7950-11e8-9a04-daf49ac46784.png)
+
+- *Current FCS file*: the FCS that is currently being debarcoded. Here we will again continue with the bone marrow data file. Press the *Select FCS* button to select the FCS file you want to debarcode. Upon selecting both the FCS file and the key, the preliminary debarcoding process will start immediately. After a few seconds a number of diagnostic plots will appear in the right portion of the window (see [below](#plot-types))
+- *Minimum separation*: the minimum seperation between the positive and negative barcode channels that an event needs to have in order to be assigned to a sample. Events where the separation is less than this threshold are left unassigned. This filtering is done after rescaling the intensity of the barcode channels, and therefore the threshold should be a number between 0 and 1. For our example we will use a minimum separation= 0.4.
+- *Maximum Mahalanobis distance*: the maximum distance between a single cell event, and the centroid of the sample the event has been assigned to. Events with distance greather than the threshold are left unassigned. The distance is capped at 30, so the default value of this option does not apply a filter based on Mahalanobis distance. Note that in some cases (for instance when there are very few events in a sample), the Mahalanobis distance calculation may fail. In this case a diagnostic message is printed in the R console, and filtering based on Mahalanobis distance is not performed for the corresponding sample.
+- *Plot type*: selects the type of plot to be displayed. Please see [below](#plot-types) for a description of the plots. Depending on the plot type, a few additional controls may be displayed:
+  - *Select sample*: select a specific sample for plotting. Sample names are taken from the barcode key
+  - *Select x axis*: select the channel to be displayed on the x axis
+  - *Select y axis*: select the channel to be displayed on the y axis
+- *Save files*: hitting this button will apply the current settings, performed the debarcoding, and save the resulting output files
+![screen shot 2018-06-26 at 3 01 26 pm](https://user-images.githubusercontent.com/36977003/41941778-d5cb090a-7951-11e8-9d93-9a103d5b2b66.png)
+
+### Plot types
+
+There are four types of visualization that allow you to inspect the results of the debarcoding process, and choose the optimal seperation and Mahalanobis distance thresholds. Each plot window is subdivided into a top and bottom section, as described below:
+
+- *Separation*
+  - *Top*: A histogram of the separation between the positive and negative barcode channels for all the events
+  - *Bottom*: Barcode yields as a function of the separation threshold. As the threshold increases, the number of cells assigned to each sample decreases, and more events are left unassigned. The currently selected threshold is displayed as a vertical red line.
+- *Event*
+  - *Top*: Bargraph or cell yields for each sample after debarcoding, given the current settings
+  - *Bottom*: Scatterplot showing the barcode channel intensities for each event, ordered on the x axis. The left plot displays the original data, arcsinh transformed. The plot on the right displays the data rescaled between 0 and 1, which is actually used for debarcoding. Both plots only displays data for the selected sample (use the *Select sample* dropdown to pick the active sample)
+- *Single biaxial*
+  - *Top*: Bargraph of cell yields for each sample after debarcoding, given the current settings
+  - *Bottom*: Scatterplot of barcode channel intensities for the selected sample. The channels displayed on the x and y axis are selected using the dropdown menus on the left (*Select x axis*, *Select y axis*). The points are colored according to the Mahalanobis distance from the centroid of the population. The color scale is displayed on top of the graph. The values plotted are arcsinh  transformed.
+- *All barcode biaxials*
+  - *Top*: Bargraph of cell yields for each sample after debarcoding, given the current setting
+  - *Bottom*: a matrix of scatterplots of barcode channel intensities for the selected sample. All possible combinations are displayed, and the channels represented on the rows and columns are identified by the names on the axes of the bottom and left-most plots. The plots on the diagonal display the distribution of intensity values for the corresponding channel
+
 
 # Gating
 * Check data, clean to make sure doublets, dead cells and unwanted populations removed
