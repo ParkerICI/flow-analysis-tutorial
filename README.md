@@ -341,7 +341,7 @@ A few examples should clarify how to use this function
 
 (create from our dataset?)
 
-##Creating an unsupervised visualization in R
+## Creating an unsupervised visualization in R
 
 ```R
 # Use as input files that have been generated using scfeatures
