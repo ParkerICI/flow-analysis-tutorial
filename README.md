@@ -304,7 +304,7 @@ If multiple files have been pooled together this table also contains columns in 
 
 ### Features generation
 
-This package also contains functions to rearrange the clustering output to calculate cluster features that can be used to build a predictive model (similar to the approach used in the Citrus package). These functions operate on the clusters summary table described above, and require data to have been pooled together before clustering (i.e. the clustering should have been run with the `cluster_fcs_files_groups` function). In other words, if you want to build a model that includes data from the four files in the example above, you need to cluster them as a single group.
+This package also contains functions to rearrange the clustering output to calculate cluster features that can be used to build a predictive model (similar to the approach used in the (Citrus)[https://github.com/nolanlab/citrus] package). These functions operate on the clusters summary table described above, and require data to have been pooled together before clustering (i.e. the clustering should have been run with the `cluster_fcs_files_groups` function). In other words, if you want to build a model that includes data from the four files in the example above, you need to cluster them as a single group.
 
 The general approach for features generation for model building, is that you want to generate a table where each row represents a cluster feature (e.g. the abundance of a cluster, or the expression of a marker in a cluster), and each column represent an observation (e.g. a different sample), for which you have a categorical or continuous endpoint of interest that you want to predict using the cluster features.
 
@@ -331,17 +331,22 @@ The two main functions are (please refer to the R documentation for all the deta
 |M.fcs  |week8      |stim2      |subject2   |NR     |3.2        |
 |N.fcs  |week8      |unstim     |subjcet2   |NR     |3.2        |
 
-There are multiple way that you could envision leveraging this data for model construction. The two key parameters of `get_cluster_features` that allow you to specify different models are:
+There are multiple ways that you could envision leveraging this data for model construction. The two key parameters of `get_cluster_features` that allow you to specify different models are:
 - `predictors`: this specifies which variables are going to be used as predictors
 - `endpoint.grouping`: this specifies which variables are used to group together files that are associated with the same endpoint
 
-A few examples should clarify how to use this function
+************* A few examples should clarify how to use this function ************* (ADD)
 
 #### Example model 1
 
 (create from our dataset?)
 
 ## Creating an unsupervised visualization in R
+
+After clusters have been generated from the steps above in (scfeatures)[#scfeatures] (though any kind of tabular input data can be used), this package and the following steps enable the analysis of single-cell data using graphs, both unsupervised graphs as well as scaffold maps. 
+
+Open a window in R and enter the following commands:
+
 
 ```R
 # Use as input files that have been generated using scfeatures
