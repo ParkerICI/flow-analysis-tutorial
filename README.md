@@ -122,7 +122,7 @@ library(premessa)
 normalizer_GUI()
 ```
 
-This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory (computer location) containing the data you want to analyze, and select any file in that directory. In this example, select a file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software.
+This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory (computer location) containing the data you want to analyze, and select any file in that directory. In this example, select a file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. Make sure that * ALL * files are selected in your window- this requires one-by-one selection from the drop down box.
 
 **The GUI contains two tabs**:
 
@@ -131,18 +131,20 @@ This will open a new web browser window, which is used for displaying the GUI. U
 This panel contains the following controls:
 
 - *Select beads type*: select the type of normalization beads that have been used for the experiment. Here we will use *Beta Beads (139, 141, 159, 175)*. The numbers indicate the beads channels used for normalization.
-- *Select FCS file*: the FCS  that is currently being visualized for gating. This dropdown will contain all the FCS files located in the working directory. The gating plots will appear under the row of buttons.
+- *Select FCS file*: the FCS  that is currently being visualized for gating. This dropdown will contain all the FCS files located in the working directory. If you want to select multiple files to work with at once, these must be selected one-by-one from the drop down box until all files appear in the window under "_You have gated beads for the following files_." The gating plots will appear under the row of buttons.
 - *Select baseline for normalization*: the baseline beads intensities to be used for normalization. You can either use the median beads intensities of the FCS files that you are currently using for normalization (*Current files* option), or the median intensities of an existing set of beads files (*Existing folder of beads files*). If you select the latter a file dialog window will pop-up when you select the option. Use the window to navigate to a directory containing FCS files containing beads events only (for instance the *BM_a_cells_beads.fcs* file in the above example) and select one of the files. The software will then load *all* the files contained in the same directory as the file you selected. The currently selected folder will be displayed in a text box on the right. 
-![screen shot 2018-06-26 at 1 38 37 pm](https://user-images.githubusercontent.com/36977003/41937841-431a42ca-7946-11e8-9657-003f2cda5646.png)
+![Screen Shot 2018-07-06 at 9.25.35 AM](https://user-images.githubusercontent.com/36977003/42381314-ab42de60-80fe-11e8-8705-b1305493c276.png)
 
 - *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots.
-![screen shot 2018-06-26 at 1 39 19 pm](https://user-images.githubusercontent.com/36977003/41937870-5c8aadee-7946-11e8-8256-21085d60a2c3.png)
+![screen shot 2018-07-06 at 9 28 20 am](https://user-images.githubusercontent.com/36977003/42381419-fc235666-80fe-11e8-8f6d-31f0304d8654.png)
 
 - *Apply current gates to all files*: applies the current gates to all the files.
-![screen shot 2018-06-26 at 1 39 54 pm](https://user-images.githubusercontent.com/36977003/41937909-71794288-7946-11e8-9fea-dc391ac7652e.png)
+![screen shot 2018-07-06 at 9 30 05 am](https://user-images.githubusercontent.com/36977003/42381487-3823ddfc-80ff-11e8-9c08-29cabd42228d.png)
 
-- *Normalize*: starts the normalization routine. When the process is completed a confirmation dialog will appear.
-The workflow involves cycling through all the files (there are five of them- a through e in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization.
+- *Normalize*: starts the normalization routine. This screen indicates GUI the normalization program is working:
+![screen shot 2018-07-06 at 9 31 57 am](https://user-images.githubusercontent.com/36977003/42381631-ae6d59f2-80ff-11e8-8ab0-aa6c9617b897.png)
+
+When the process is completed a confirmation dialog will appear and the normalized versions of the selected files will be  saved in the directory you selected the files from. The workflow involves cycling through all the files (there are five of them- a through e in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization. 
 
 You can cycle back and forth between different files, as the GUI will remember the gates you have selected for each file.
 
