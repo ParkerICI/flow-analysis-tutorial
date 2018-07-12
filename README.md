@@ -85,36 +85,48 @@ The workflow for this normalization method invovles the following steps:
 2. Data normalization
 3. Bead removal (optional)
 
-Assuming you're using the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as your working directory and it contains two FCS files called BM_a_cells.FCS and BM_b_cells.FCS, at the end of the workflow the following directory structure and output files will be generated:
+Assuming you're using the example [Science data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as your working directory and it contains two FCS files called BM_cells.FCS and SPL_cells.FCS, at the end of the workflow the following directory structure and output files will be generated:
 
 ```
-Bone_marrow
-|--- BM_a_cells.FCS 
-|--- BM_b_cells.FCS 
+Science data
+|--- BM_cells.FCS 
+|--- SPL_cells.FCS 
+|--- LN_cells.FCS 
+|--- BLD_cells.FCS
 |--- normed
-     |--- BM_a_cells_normalized.fcs
-     |--- BM_b_cells_normalized.fcs
+     |--- BM_cells_normalized.fcs
+     |--- SPL_cells_normalized.fcs
+     |--- LN_cells_normalized.FCS 
+     |--- BLD_cells_normalized.FCS
      |--- beads_before_and_after.pdf
      |--- beads_vs_time
-          |--- BM_a_cells.pdf
-          |--- BM_b_cells.pdf
+          |--- BM_cells.pdf
+          |--- SPL_cells.pdf
+          |--- LN_cells.pdf
+          |--- BLD_cells.pdf
      |--- beads_removed
-          |--- BM_a_cells_normalized_beadsremoved.fcs
-          |--- BM_b_cells_normalized_beadsremoved.fcs
+          |--- BM_cells_normalized_beadsremoved.fcs
+          |--- SPL_cells_normalized_beadsremoved.fcs
+          |--- LN_cells_normalized_beadsremoved.fcs
+          |--- BLD_cells_normalized_beadsremoved.fcs
           |--- removed_events
-               |--- BM_a_cells_normalized_removedEvents.fcs
-               |--- BM_b_cells_normalized_removedEvents.fcs
+               |--- BM_cells_normalized_removedEvents.fcs
+               |--- SPL_cells_normalized_removedEvents.fcs
+               |--- LN_cells_normalized_removedEvents.fcs
+               |--- BLD_cells_normalized_removedEvents.fcs 
      |--- beads
-          |--- BM_a_cells_beads.fcs
-          |--- BM_b_cells_beads.fcs
+          |--- BM_cells_beads.fcs
+          |--- SPL_cells_beads.fcs
+          |--- LN_cells_beads.fcs
+          |--- BLD_cells_beads.fcs
 ```
 
-- *BM_a_cells_normalized.fcs*: contains the normalized data, with an added parameter called *beadDist* representing the square root of the Mahalanobis distance of each event from the centroid of the beads population
+- *BM_cells_normalized.fcs*: contains the normalized data, with an added parameter called *beadDist* representing the square root of the Mahalanobis distance of each event from the centroid of the beads population
 - *beads_before_and_after.pdf*: a plot of the median intensities of the beads channels before and after normalization. This plot contains a single median value per sample. Therefore it will not be informative if you are normalizing a single sample
-- *BM_a_cells.pdf*: a plot of the intensities of the beads channels along time, before and after normalization
-- *BM_a_cells_normalized_beadsremoved.fcs*: the normalized data with the beads events removed
-- *BM_a_cells_normalized_removedEevents.fcs*: the events that have been removed from the normalized data based on the Mahalanobis distance cutoff 
-- *BM_a_cells_beads.fcs*: the beads events, as identified by gating
+- *BM_cells.pdf*: a plot of the intensities of the beads channels along time, before and after normalization
+- *BM_cells_normalized_beadsremoved.fcs*: the normalized data with the beads events removed
+- *BM_cells_normalized_removedEevents.fcs*: the events that have been removed from the normalized data based on the Mahalanobis distance cutoff 
+- *BM_cells_beads.fcs*: the beads events, as identified by gating
 
 ### Starting the normalization GUI and selecting the working directory and example data
 You can start the normalizer GUI by typing the following commands in your R session:
@@ -134,19 +146,19 @@ This panel contains the following controls:
 
 - *Select beads type*: select the type of normalization beads that have been used for the experiment. Here we will use *Beta Beads (139, 141, 159, 175)*. The numbers indicate the beads channels used for normalization.
 - *Select FCS file*: the FCS  that is currently being visualized for gating. This dropdown will contain all the FCS files located in the working directory. If you want to select multiple files to work with at once, these must be selected one-by-one from the drop down box until all files appear in the window under "_You have gated beads for the following files_." The gating plots will appear under the row of buttons.
-- *Select baseline for normalization*: the baseline beads intensities to be used for normalization. You can either use the median beads intensities of the FCS files that you are currently using for normalization (*Current files* option), or the median intensities of an existing set of beads files (*Existing folder of beads files*). If you select the latter a file dialog window will pop-up when you select the option. Use the window to navigate to a directory containing FCS files containing beads events only (for instance the *BM_a_cells_beads.fcs* file in the above example) and select one of the files. The software will then load *all* the files contained in the same directory as the file you selected. The currently selected folder will be displayed in a text box on the right. 
-![Screen Shot 2018-07-06 at 9.25.35 AM](https://user-images.githubusercontent.com/36977003/42381314-ab42de60-80fe-11e8-8705-b1305493c276.png)
+- *Select baseline for normalization*: the baseline beads intensities to be used for normalization. You can either use the median beads intensities of the FCS files that you are currently using for normalization (*Current files* option), or the median intensities of an existing set of beads files (*Existing folder of beads files*). If you select the latter a file dialog window will pop-up when you select the option. Use the window to navigate to a directory containing FCS files containing beads events only (for instance the *BM_cells_beads.fcs* file in the above example) and select one of the files. The software will then load *all* the files contained in the same directory as the file you selected. The currently selected folder will be displayed in a text box on the right. 
 
 - *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots.
-![screen shot 2018-07-06 at 9 28 20 am](https://user-images.githubusercontent.com/36977003/42381419-fc235666-80fe-11e8-8f6d-31f0304d8654.png)
 
-- *Apply current gates to all files*: applies the current gates to all the files.
-![screen shot 2018-07-06 at 9 30 05 am](https://user-images.githubusercontent.com/36977003/42381487-3823ddfc-80ff-11e8-9c08-29cabd42228d.png)
+- *Apply current gates to all files*: applies the current gates to all the files. At this point the screen should look like this:
+[screen shot 2018-07-12 at 5 20 42 pm](https://user-images.githubusercontent.com/36977003/42660823-443255ba-85fa-11e8-937c-a4d6726d7944.png)
 
-- *Normalize*: starts the normalization routine. This screen indicates GUI the normalization program is working:
-![screen shot 2018-07-06 at 9 31 57 am](https://user-images.githubusercontent.com/36977003/42381631-ae6d59f2-80ff-11e8-8ab0-aa6c9617b897.png)
+- *Normalize*: starts the normalization routine. 
 
-When the process is completed a confirmation dialog will appear and the normalized versions of the selected files will be  saved in the directory you selected the files from. The workflow involves cycling through all the files (there are five of them- a through e in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization. 
+When the process is completed a confirmation dialog will appear:
+[screen shot 2018-07-12 at 5 36 18 pm](https://user-images.githubusercontent.com/36977003/42660766-22f11fe4-85fa-11e8-87a0-9b9edff83a9f.png)
+
+The normalized versions of the selected files will be  saved in the directory you selected the files from. The workflow involves cycling through all the files (there are four of them in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization. 
 
 You can cycle back and forth between different files, as the GUI will remember the gates you have selected for each file.
 
@@ -157,35 +169,35 @@ This panel has the following controls:
 - *Select beads type*: same as for the *Normalize data* panel: select the type of normalization beads that have been used for the experiment. In our example, we are using the Beta Beads option.
 - *Select FCS file*: select the FCS file for plotting. The dropdown will contain all the FCS files located in the *normed* sub-folder of the working directory. The plots will appear below the row of buttons. See below for a description of what the plots represent
 - *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. This requires looking at the data and chosing an appropriate cut point (orange=beads, blue=no beads, more on this below)
-- *Remove beads (current file)*: use the current cutoff to remove beads from the currently selected file. When the process is completed a confirmation dialog will appear
-![screen shot 2018-06-26 at 2 07 53 pm](https://user-images.githubusercontent.com/36977003/41939347-5a67c124-794a-11e8-8a3c-e1a15bf3aedb.png)
+- *Remove beads (current file)*: use the current cutoff to remove beads from the currently selected file.
+- *Remove beads (all files)*: use the current cutoff to remove beads from all the files in the folder (i.e. all the files that are listed in the *Select FCS file* dropdown):
+[screen shot 2018-07-12 at 5 52 07](https://user-images.githubusercontent.com/36977003/42661497-56b6293a-85fc-11e8-95ad-1ff105bfca39.png)
 
-- *Remove beads (all files)*: use the current cutoff to remove beads from all the files in the folder (i.e. all the files that are listed in the *Select FCS file* dropdown). When the process is completed a confirmation dialog will appear
- ![screen shot 2018-06-26 at 2 11 28 pm](https://user-images.githubusercontent.com/36977003/41939495-daa079a8-794a-11e8-970d-94a1ae2a665f.png)
- 
-The bead removal procedure is based on the idea of looking at the distance between each event and the centroid of the beads population, and removing all the events that are closer than a given threshold to the beads population, and therefore are likely to represent beads as opposed to true cells.
+When the process is completed, the following screen will appear:
+
+The **bead removal procedure** is based on the idea of looking at the distance between each event and the centroid of the beads population, and removing all the events that are closer than a given threshold to the beads population, and therefore are likely to represent beads as opposed to true cells.
 
 To this end, during normalization, the software calculates the square root of the Mahalanobis distance of each event from the centroid of the beads population, and records this information in the *beadDist* parameter in the FCS file with the normalized data (i.e. the *_normalized.fcs* files in the *normed* sub-folder).
 
 During the beads removal step, all the events whose *beadDist* is less or equal than the *Cutoff for bead removal* parameter are removed from the FCS. The removed events are saved in the *removed_events* sub-folder (see above).
 
-The plots in the bottom half of the panel help you select an appropriate cutoff. They display all the pairs of beads channels. Beads should appear as a population in the upper right corner (as they will be double-positives for all the channel pairs). The color of the points represent the distance from the beads population. You should choose a cutoff so that most of the bead events are below the cutoff, and most of the non-beads events are above it. The legend for the color scale is located above the plots.
+The plots in the bottom half of the panel help you select an appropriate cutoff. They display all the pairs of beads channels. Beads should appear as a population in the upper right corner (as they will be double-positives for all the channel pairs). The color of the points represent the distance from the beads population. You should choose a cutoff so that most of the bead events (orange) are below the cutoff, and most of the non-beads events (blue) are above it. The legend for the color scale is located above the plots.
 
 To stop the software simply hit the "ESC" key in your R session. _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
 # De-barcoding
 Combinatorial barcoding allows for identifying and removing errors from your dataset. [This paper](https://www.ncbi.nlm.nih.gov/pubmed/25612231) describes the concept of applying single cell-based debarcoding algorithms and it's advantages over population-based methods in terms of allowing for rapid and unbiased sample deconvolution.
 
-Assuming the FCS file *BM_a_cells.fcs* is located in the directory *Bone_marrow*, and the barcode key defines 3 barcoded populations (A, B, C), the following directories and output files will be created at the end of the debarcoding process:
+Assuming the FCS file *BM_cells.fcs* is located in the directory *Science Data*, and the barcode key defines 3 barcoded populations (A, B, C), the following directories and output files will be created at the end of the debarcoding process:
 
 ```
-Bone_marrow
-|--- BM_a_cells.fcs
+Science Data
+|--- BM_cells.fcs
 |--- debarcoded
-     |--- BM_a_cells.A.fcs.fcs
-     |--- BM_a_cells.B.fcs.fcs
-     |--- BM_a_cells.C.fcs
-     |--- BM_a_cells_Unassigned.fcs
+     |--- BM_cells.A.fcs.fcs
+     |--- BM_cells.B.fcs.fcs
+     |--- BM_cells.C.fcs
+     |--- BM_cells_Unassigned.fcs
 ```
 
 ### Starting the de-barcoding GUI and selecting the working directory and example data
@@ -249,7 +261,7 @@ Given our set of files, three modes of clustering are possible:
 
 The choice in clustering here has important implications for feature generation and subsequent model building (more below).
 
-Our example input directory called `Bone_marrow` contains five files:
+Our example input directory called `Science Data` contains five files:
 ```
 - BM_a_cells.fcs
 - BM_b_cells.fcs
