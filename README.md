@@ -70,7 +70,6 @@ library(premessa)
 paneleditor_GUI()
 ```
 This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory containing the data you want to analyze, and select any file in that directory. The directory itself will then become the working directory for the software.
-
 ![screen shot 2018-06-26 at 1 35 36 pm](https://user-images.githubusercontent.com/36977003/41937690-dac216a8-7945-11e8-95f2-ff9ad3a9dd9c.png)
 
 To stop the software simply hit the "ESC" key in your R session.
@@ -151,12 +150,12 @@ This panel contains the following controls:
 - *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots.
 
 - *Apply current gates to all files*: applies the current gates to all the files. At this point the screen should look like this:
-[screen shot 2018-07-12 at 5 20 42 pm](https://user-images.githubusercontent.com/36977003/42660823-443255ba-85fa-11e8-937c-a4d6726d7944.png)
+![screen shot 2018-07-12 at 5 20 42 pm](https://user-images.githubusercontent.com/36977003/42660823-443255ba-85fa-11e8-937c-a4d6726d7944.png)
 
 - *Normalize*: starts the normalization routine. 
 
 When the process is completed a confirmation dialog will appear:
-[screen shot 2018-07-12 at 5 36 18 pm](https://user-images.githubusercontent.com/36977003/42660766-22f11fe4-85fa-11e8-87a0-9b9edff83a9f.png)
+![screen shot 2018-07-12 at 5 36 18 pm](https://user-images.githubusercontent.com/36977003/42660766-22f11fe4-85fa-11e8-87a0-9b9edff83a9f.png)
 
 The normalized versions of the selected files will be  saved in the directory you selected the files from. The workflow involves cycling through all the files (there are four of them in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization. 
 
@@ -171,7 +170,7 @@ This panel has the following controls:
 - *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. This requires looking at the data and chosing an appropriate cut point (orange=beads, blue=no beads, more on this below)
 - *Remove beads (current file)*: use the current cutoff to remove beads from the currently selected file.
 - *Remove beads (all files)*: use the current cutoff to remove beads from all the files in the folder (i.e. all the files that are listed in the *Select FCS file* dropdown):
-[screen shot 2018-07-12 at 5 52 07](https://user-images.githubusercontent.com/36977003/42661497-56b6293a-85fc-11e8-95ad-1ff105bfca39.png)
+![screen shot 2018-07-12 at 5 52 07](https://user-images.githubusercontent.com/36977003/42661497-56b6293a-85fc-11e8-95ad-1ff105bfca39.png)
 
 When the process is completed, the following screen will appear:
 
