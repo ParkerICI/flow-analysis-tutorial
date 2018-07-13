@@ -388,8 +388,7 @@ col.names <- c("foo", "bar", "foobar")
 G <- vite::get_unsupervised_graph_from_files(input.files, metadata.tab = metadata.tab, 
             metadata.filename.col = "filename", col.names = col.names, filtering.threshold = 15)
 
-# Write the resulting graph in graphml format. The Gephi software package (https://gephi.org/) is an excellent 
-# solution to interactively manipulate the data
+# Write the resulting graph in graphml format
 igraph::write.graph(G, "unsupervised.graphml", format = "grpahml")
 ```
 
