@@ -9,7 +9,7 @@ This repository is a resource for PICI members performing end-to-end single-cell
 4. [scgraphs](https://github.com/ParkerICI/scgraphs)
 5. [scfeatures](https://github.com/ParkerICI/scfeatures)
 6. [scaffold](https://github.com/ParkerICI/scaffold2)
-7. [Rtsne](https://github.com/jkrijthe/Rtsne)
+
 
 **Install a C++ compiler**
 Some steps require a working C++ compiler for installation- please refer to the appropriate option depending on your system.
@@ -25,29 +25,23 @@ Install GCC. Refer to the documentation of your distribution to find the specifi
 
 ### Install R Packages
 To install these packages, open an R session and enter the following command lines:
-```
-install.packages("devtools")
-
+```R
+# This installs the Bioconductor flowCore package, which is used to read FCS files
 source("http://bioconductor.org/biocLite.R")
 biocLite("flowCore")
 
-install.packages("premessa")
+# This installs the devtools package, which is required to install packages from github
+install.packages("devtools")
 
-install.packages("scgraphs")
-
-library(devtools)
+devtools::install_github("ParkerICI/premessa")
 devtools::install_github("ParkerICI/scfeatures")
-
-library(devtools)
+devtools::install_github("ParkerICI/scgraphs")
 devtools::install_github("ParkerICI/scaffold2")
-library(scaffold2)
-scaffold2()
-
-install.packages("Rtsne")
 ```
 ## Usage
-In this tutorial, we will go step-by-step covering methods to optimally visualize single cell data. After downloading the [datasets](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) (from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) in _Science_), we will go through this method in order of the following general steps:
+In this tutorial, we will go step-by-step covering methods to analyze and visualize high-dimensional single cell data. After downloading the [datasets](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) (from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) in _Science_), we will go through the following steps:
 
+* [Panel editing](#panel-editing)
 * [Normalization](#normalization)
 * [De-barcoding](#de-barcoding)
 * [Gating](#gating)
@@ -57,15 +51,22 @@ In this tutorial, we will go step-by-step covering methods to optimally visualiz
 * [Associating cell populations with endpoints of interest](#associating-cell-populations-with-endpoints-of-interest)
   
 
+Several tools described in this tutorial are built are GUI using the [shiny](https://shiny.rstudio.com/) framework. It is a good idea to familiarize yourself with starting and stopping this GUI applications. In general:
+* You start the application by invoking some function in your R console (e.g. premessa::normalizer_GUI())
+* For several applications you will be requested to select a working directory, which contains all the files that are part of the analysis. To this end, immediately after you start the application, a file selection dialog will pop-up. Unfortuantely R does not provide the infrastructure to select *directories*. What you will do instead is selecting **any** *file* that's contained in the directory of intereset, and the corresponding directory will be selected
+* To stop the application switch back to your R console and press the `ESC` key. Note that while the application is running, it "hijacks" you R session, therefore anything you type in there will not have any effect. The only thing you can do in your R session while the application is running is pressing `ESC` to stop it
+
+
 ## Panel editing
-When you need to harmonize panels across a number of files, panel editing and renaming is useful so that they can be prepared for downstream analysis (most analysis tools expect files that are part of the same analysis to have identical panels). The R package [premessa](https://github.com/ParkerICI/premessa) allows for such editing.
+Most analysis tools expect files that are part of the same analysis to have parameters and reagents named consistently. The [premessa](https://github.com/ParkerICI/premessa) includes a GUI tool that can be used to rename and synchronize panels across multiple FCS files.
+
 
 ****(create a case from existing files where we'd have to apply this step)*****
 
 ### Starting the panel editing GUI and selecting the working directory and example data
 
-You can start the normalizer GUI by typing the following commands in your R session:
-```
+You can start the panel editing GUI by typing the following commands in your R session:
+```R
 library(premessa)
 paneleditor_GUI()
 ```
@@ -77,10 +78,16 @@ To stop the software simply hit the "ESC" key in your R session.
 _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
 
-# Normalization
-There are several sources of variability in flow-based data, and normalization is an essential method in controlling such variability. [Bead-based normalization](https://www.ncbi.nlm.nih.gov/pubmed/23512433) provides several advantages, as it controls variability over time uniquely for each event and accounts for instrument sensitivity changes in the short- and long- term.
+# Normalization (CyTOF only)
+The sensitivity of a CyTOF machine changes between different days (due to tuning) as well as during a single run due to variations in detector performance. To correct for this effect, [this](https://www.ncbi.nlm.nih.gov/pubmed/23512433) introduced the use of polystirene beads that can be used as a reference synthetic standard.
 
-The workflow for this normalization method invovles the following steps:
+The normalization algorithm works by identifying a reference intensity for the beads channel and then applying a correction factor to the data so that the intensity at every specific time matches the reference intensity
+
+This reference intensity can be calculated in one of two ways:
+* By calculating the median bead intensity for all the files that are part of the current analysis
+* By referring to a previously acquired set of beads, derived for instance from another experiment
+
+For the purpose of this tutorial we will use the first method. The workflow for this method invovles the following steps:
 1. Bead identification through gating
 2. Data normalization
 3. Bead removal (optional)
@@ -109,52 +116,54 @@ Bone_marrow
           |--- BM_b_cells_beads.fcs
 ```
 
-- *BM_a_cells_normalized.fcs*: contains the normalized data, with an added parameter called *beadDist* representing the square root of the Mahalanobis distance of each event from the centroid of the beads population
+- *BM_a_cells_normalized.fcs*: contains the normalized data, with an added parameter called *beadDist* representing the square root of the Mahalanobis distance of each event from the centroid of the beads population. In other words, this number represents how much every cell event is similar (in terms of beads channel intensty) to the beads population that you have identified manually
 - *beads_before_and_after.pdf*: a plot of the median intensities of the beads channels before and after normalization. This plot contains a single median value per sample. Therefore it will not be informative if you are normalizing a single sample
+- *beads_vs_time*: this folder contains a plot for each file, displaying the intensity of the beads before and after normalization as a function of time
 - *BM_a_cells.pdf*: a plot of the intensities of the beads channels along time, before and after normalization
 - *BM_a_cells_normalized_beadsremoved.fcs*: the normalized data with the beads events removed
 - *BM_a_cells_normalized_removedEevents.fcs*: the events that have been removed from the normalized data based on the Mahalanobis distance cutoff 
 - *BM_a_cells_beads.fcs*: the beads events, as identified by gating
 
 ### Starting the normalization GUI and selecting the working directory and example data
-You can start the normalizer GUI by typing the following commands in your R session:
+You can start the normalizer GUI by typing the following commands in your R session (see [usage](#usage) for general information about using the GUI):
 
-```
+```R
 library(premessa)
 normalizer_GUI()
 ```
 
-This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory (computer location) containing the data you want to analyze, and select any file in that directory. In this example, select a file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. Make sure that * ALL * files are selected in your window- this requires one-by-one selection from the drop down box.
+Select any file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. Make sure that * ALL * files are selected in your window- this requires one-by-one selection from the drop down box.
 
-**The GUI contains two tabs**:
+The GUI contains two tabs:
 
 **1. Normalize data:** used for beads gating and normalization 
 
 This panel contains the following controls:
 
 - *Select beads type*: select the type of normalization beads that have been used for the experiment. Here we will use *Beta Beads (139, 141, 159, 175)*. The numbers indicate the beads channels used for normalization.
-- *Select FCS file*: the FCS  that is currently being visualized for gating. This dropdown will contain all the FCS files located in the working directory. If you want to select multiple files to work with at once, these must be selected one-by-one from the drop down box until all files appear in the window under "_You have gated beads for the following files_." The gating plots will appear under the row of buttons.
-- *Select baseline for normalization*: the baseline beads intensities to be used for normalization. You can either use the median beads intensities of the FCS files that you are currently using for normalization (*Current files* option), or the median intensities of an existing set of beads files (*Existing folder of beads files*). If you select the latter a file dialog window will pop-up when you select the option. Use the window to navigate to a directory containing FCS files containing beads events only (for instance the *BM_a_cells_beads.fcs* file in the above example) and select one of the files. The software will then load *all* the files contained in the same directory as the file you selected. The currently selected folder will be displayed in a text box on the right. 
+- *Select FCS file*: the FCS  that is currently being visualized for gating. This dropdown will contain all the FCS files located in the working directory. You are going to have to gate each file individually. Only the files that you have manually gated will be normalized, as detailed in the _"You have gated beads for the following files"_ The gating plots will appear under the row of buttons.
+- *Select baseline for normalization*: the baseline beads intensities to be used for normalization. You can either use the median beads intensities of the FCS files that you are currently using for normalization (*Current files* option), or the median intensities of an existing set of beads files (*Existing folder of beads files*). For the purpose of this tutorial we will use the *Current files* option. If you wanted to use the other option, a file selection dialog would pop-up when you select the option. You would then use the window to navigate to a directory containing FCS files of beads events only (for instance the *BM_a_cells_beads.fcs* file in the above example) and select one of the files. The software would then load *all* the files contained in the same directory as the file you selected. The currently selected folder will be displayed in a text box on the right. 
 ![Screen Shot 2018-07-06 at 9.25.35 AM](https://user-images.githubusercontent.com/36977003/42381314-ab42de60-80fe-11e8-8705-b1305493c276.png)
 
-- *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots.
+- *Identify beads*: clicking this button will color in red the events that are recognized as beads events in the gating plots. Note that this is only for visual display, whether you push this button or not does not change the operation of the normalization algorithm
 ![screen shot 2018-07-06 at 9 28 20 am](https://user-images.githubusercontent.com/36977003/42381419-fc235666-80fe-11e8-8f6d-31f0304d8654.png)
 
-- *Apply current gates to all files*: applies the current gates to all the files.
+- *Apply current gates to all files*: applies the current gates to all the files. Use this if you are satistified with the gates and you do not want to cycle manually through all the files
 ![screen shot 2018-07-06 at 9 30 05 am](https://user-images.githubusercontent.com/36977003/42381487-3823ddfc-80ff-11e8-9c08-29cabd42228d.png)
 
-- *Normalize*: starts the normalization routine. This screen indicates GUI the normalization program is working:
-![screen shot 2018-07-06 at 9 31 57 am](https://user-images.githubusercontent.com/36977003/42381631-ae6d59f2-80ff-11e8-8ab0-aa6c9617b897.png)
+- *Normalize*: starts the normalization routine. 
 
-When the process is completed a confirmation dialog will appear and the normalized versions of the selected files will be  saved in the directory you selected the files from. The workflow involves cycling through all the files (there are five of them- a through e in our example) and adjusting the beads gates in the plot, in order to identify the beads. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization. 
+The workflow involves cycling through all the files (there are five of them- a through e in our example) and adjusting the beads gates in the plot, in order to identify the beads. You can cycle back and forth between different files, as the GUI will remember the gates you have selected for each file. Only events that are included in *all* the beads gates are identified as beads. As detailed in the dialog box that is above the row of buttons, only files for which the gates have been defined will be used as input for normalization. 
 
-You can cycle back and forth between different files, as the GUI will remember the gates you have selected for each file.
+After you hit the *Normalize* button, the normalization routine will start. When the process is completed a confirmation dialog will appear and the normalized versions of the selected files will be  saved in the directory you selected the files from. 
+
+
 
 **2. Remove beads**: used for beads removal 
 
 This panel has the following controls:
 
-- *Select beads type*: same as for the *Normalize data* panel: select the type of normalization beads that have been used for the experiment. In our example, we are using the Beta Beads option.
+- *Select beads type*: same as for the *Normalize data* panel: select the type of normalization beads that have been used for the experiment. In our example, we are using the *Beta Beads* option.
 - *Select FCS file*: select the FCS file for plotting. The dropdown will contain all the FCS files located in the *normed* sub-folder of the working directory. The plots will appear below the row of buttons. See below for a description of what the plots represent
 - *Cutoff for bead removal*: the Mahalanobis distance cutoff to be used for bead removal. This requires looking at the data and chosing an appropriate cut point (orange=beads, blue=no beads, more on this below)
 - *Remove beads (current file)*: use the current cutoff to remove beads from the currently selected file. When the process is completed a confirmation dialog will appear
@@ -163,7 +172,7 @@ This panel has the following controls:
 - *Remove beads (all files)*: use the current cutoff to remove beads from all the files in the folder (i.e. all the files that are listed in the *Select FCS file* dropdown). When the process is completed a confirmation dialog will appear
  ![screen shot 2018-06-26 at 2 11 28 pm](https://user-images.githubusercontent.com/36977003/41939495-daa079a8-794a-11e8-970d-94a1ae2a665f.png)
  
-The bead removal procedure is based on the idea of looking at the distance between each event and the centroid of the beads population, and removing all the events that are closer than a given threshold to the beads population, and therefore are likely to represent beads as opposed to true cells.
+The bead removal procedure is based on the idea of looking at the distance between each event and the centroid of the beads population, and removing all the events that are closer than a given threshold to the beads population, and therefore are likely to represent beads (or beads-cells doublets) as opposed to true cells.
 
 To this end, during normalization, the software calculates the square root of the Mahalanobis distance of each event from the centroid of the beads population, and records this information in the *beadDist* parameter in the FCS file with the normalized data (i.e. the *_normalized.fcs* files in the *normed* sub-folder).
 
@@ -171,10 +180,14 @@ During the beads removal step, all the events whose *beadDist* is less or equal 
 
 The plots in the bottom half of the panel help you select an appropriate cutoff. They display all the pairs of beads channels. Beads should appear as a population in the upper right corner (as they will be double-positives for all the channel pairs). The color of the points represent the distance from the beads population. You should choose a cutoff so that most of the bead events are below the cutoff, and most of the non-beads events are above it. The legend for the color scale is located above the plots.
 
-To stop the software simply hit the "ESC" key in your R session. _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
-# De-barcoding
-Combinatorial barcoding allows for identifying and removing errors from your dataset. [This paper](https://www.ncbi.nlm.nih.gov/pubmed/25612231) describes the concept of applying single cell-based debarcoding algorithms and it's advantages over population-based methods in terms of allowing for rapid and unbiased sample deconvolution.
+# De-barcoding (CyTOF only)
+
+Barcoding (described in [this](https://www.ncbi.nlm.nih.gov/pubmed/25612231) publication) is a way to minimize staining variability across multiple samples. Each sample is labeled with a unique combination of metals before staining. All the samples are then pooled in a single tube, and stained in a single reaction, which guarantees that they are all exposed to the same amount of antibody.
+
+After the data for this pooled sample is acquired, the software goes through each cell event and assigns it to one of the original samples, based on the combination of barcode labels that are measured on that cell. Each sample is written in a separate file, therefore a single FCS file from the pooled sample is processed by this software to give as many FCS files as the number of samples that were pooled.
+
+It is important to note that barcoding only addresses variability that is due to staining differences. It does **not** account for variation due to instrument setup or sensitivity (you need to use [normalization](#normalization) for that)
 
 Assuming the FCS file *BM_a_cells.fcs* is located in the directory *Bone_marrow*, and the barcode key defines 3 barcoded populations (A, B, C), the following directories and output files will be created at the end of the debarcoding process:
 
@@ -188,26 +201,31 @@ Bone_marrow
      |--- BM_a_cells_Unassigned.fcs
 ```
 
-### Starting the de-barcoding GUI and selecting the working directory and example data
+### Using the de-barcoding GUI 
+
+The de-barcoding workflow mainly consists of selecting the optimal threshold for the separation between the barcode channels. This is done by manually inspecting a number of diagnostic plots that are displayed in the GUI.
+
+More specifically, the assignment to a specific population is performed by looking at the separation between positive and negative barcode channels for each cell. Well separated events can be confidently assigned however, as the separation decreases, cells will be discarded (i.e. left unassigned) because they cannot be reliably assigned. The idea is to identify a separation threshold that is stringent enough to correctly assign cells to their barcode population but not so stringent that a lot of cells need to be discarded. This is mainly done by inspecting the *Separation* plot (see below)
+
 You can start the de-barcoding GUI by typing the following commands in your R session:
 
-```
+```R
 library(premessa)
 debarcoding_GUI()
 ```
 Upon launching the GUI you will have access to the following controls:
 
-- *Current barcode key*: the CSV file containing the barcode key. To upload the key to follow our example dataset, press the *Select key* button and select the [file](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets).
+- *Current barcode key*: the CSV file containing the barcode key. Select the key associated with our sample dataset by pressing the *Select key* button and select the [file](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets).
 ![screen shot 2018-06-26 at 2 54 08 pm](https://user-images.githubusercontent.com/36977003/41941422-ce225790-7950-11e8-9a04-daf49ac46784.png)
 
 - *Current FCS file*: the FCS that is currently being debarcoded. Here we will again continue with the bone marrow data file. Press the *Select FCS* button to select the FCS file you want to debarcode. Upon selecting both the FCS file and the key, the preliminary debarcoding process will start immediately. After a few seconds a number of diagnostic plots will appear in the right portion of the window (see [below](#plot-types))
-- *Minimum separation*: the minimum seperation between the positive and negative barcode channels that an event needs to have in order to be assigned to a sample. Events where the separation is less than this threshold are left unassigned. This filtering is done after rescaling the intensity of the barcode channels, and therefore the threshold should be a number between 0 and 1. For our example we will use a minimum separation= 0.4.
+- *Minimum separation*: the minimum seperation between the positive and negative barcode channels that an event needs to have in order to be assigned to a sample. Events where the separation is less than this threshold are left unassigned. This filtering is done after rescaling the intensity of the barcode channels, and therefore the threshold should be a number between 0 and 1. For our example we will use a minimum separation = 0.4.
 - *Maximum Mahalanobis distance*: the maximum distance between a single cell event, and the centroid of the sample the event has been assigned to. Events with distance greather than the threshold are left unassigned. The distance is capped at 30, so the default value of this option does not apply a filter based on Mahalanobis distance. Note that in some cases (for instance when there are very few events in a sample), the Mahalanobis distance calculation may fail. In this case a diagnostic message is printed in the R console, and filtering based on Mahalanobis distance is not performed for the corresponding sample.
 - *Plot type*: selects the type of plot to be displayed. Please see [below](#plot-types) for a description of the plots. Depending on the plot type, a few additional controls may be displayed:
   - *Select sample*: select a specific sample for plotting. Sample names are taken from the barcode key
   - *Select x axis*: select the channel to be displayed on the x axis
   - *Select y axis*: select the channel to be displayed on the y axis
-- *Save files*: hitting this button will apply the current settings, performed the debarcoding, and save the resulting output files
+- *Save files*: hitting this button will apply the current settings, performe the debarcoding, and save the resulting output files
 ![screen shot 2018-06-26 at 3 01 26 pm](https://user-images.githubusercontent.com/36977003/41941778-d5cb090a-7951-11e8-9d93-9a103d5b2b66.png)
 
 ### Plot types
@@ -216,7 +234,7 @@ There are four types of visualization that allow you to inspect the results of t
 
 - *Separation*
   - *Top*: A histogram of the separation between the positive and negative barcode channels for all the events
-  - *Bottom*: Barcode yields as a function of the separation threshold. As the threshold increases, the number of cells assigned to each sample decreases, and more events are left unassigned. The currently selected threshold is displayed as a vertical red line.
+  - *Bottom*: Barcode yields as a function of the separation threshold. As the threshold increases, the number of cells assigned to each sample decreases, and more events are left unassigned. The currently selected threshold is displayed as a vertical red line. **This is probably the most important plot**. The ideal separation threshold is usually found right before the end of the plateau in barcode yields, before the curve drops dramatically
 - *Event*
   - *Top*: Bargraph or cell yields for each sample after debarcoding, given the current settings
   - *Bottom*: Scatterplot showing the barcode channel intensities for each event, ordered on the x axis. The left plot displays the original data, arcsinh transformed. The plot on the right displays the data rescaled between 0 and 1, which is actually used for debarcoding. Both plots only displays data for the selected sample (use the *Select sample* dropdown to pick the active sample)
@@ -229,25 +247,38 @@ There are four types of visualization that allow you to inspect the results of t
 
 
 # Gating
-* Check data, clean to make sure doublets, dead cells and unwanted populations removed
-* Manually gated data will establish landmark nodes, for this use desired software system (we use Cell Engine)
 
-# Visualization
+Whatever analysis you are thinking of doing, some amount of gating is usually required. At a minimum you usually want to remove doublets and dead cells.
 
-## Unsupervised visualization 
-The first task is to get and idea of the structure of the sample— what cells are in there? How many different populations can we identify as a first pass? What are the markers combinations that define such populations? Rather than using standard dimension-reduction methods PCA or tSNE, both of which have limitations, we will use **Force-directed graphs** to achieve this.
+Depening on the panel you are using, you may also need to remove certain populations that you do not want to include in the analysis. For instance if you are using a T-cell specific panel, you will probably want to exclude any non T-cell from the analysis, since the panel does not include any useful measurement on those
 
-Like other graphical methods, **Force-directed graphs** (_cite_) offer flexibility of visulization, as each node represents one cell (or cluster of cells) and each edge represents similarity between cells which can correspond to a variety of distance metrics or functions, but for our purposes we will use cosine (_link scgraphs package_).  In this layout the edges act as springs, whose strength is proportional to the weight of the edge (i.e. the similarity between the nodes). The algorithm then proceeds as a physical simulation by pulling together nodes that are similar (i.e. are connected by strong springs), and repelling dissimilar nodes. The end result is a layout where groups of similar cells are located close on the page, exactly what we set out to do for our visualization. (_cite Zunder:2015gp, Levine:2015ew, Samusik:2016ev, Spitzer:2015jd_?}
+The process of gating will not be covered in this tutorial, as there are multiple commercial packages available for this
 
-* Number of neighbours=15
+# Clustering
 
-## Clustering
-Given our set of files, three modes of clustering are possible:
-* Cluster each file/sample independently
-* Pool all files from a given tissue type and cluster
-* Pool all files then cluster and extract features from each group of cells (like change in expression, fold change) and look at association with endpoint
+Now that we have a set of pre-processed and cleaned up files, it is time to start analyzing the data.
 
-The choice in clustering here has important implications for feature generation and subsequent model building (more below).
+Clustering, i.e. the process of grouping together cells that express similar combination of markers, is a very useful first step, as it reduces the amount of data to work with from potentially millions of individual cells, to a few hundred clusters.
+
+Ideally the concept of cluster would correspond to the biological concept of population, but this may very well not happen in practice. A cellular population is defined by function (i.e. two cells belong to two separate populations if they have different functional properties). So a cluster may not correspond to a population because:
+
+1. clustering itself is a not a well-defined computational problem, and no clustering algorithm is perfect
+2. while different populations have different functions and they can be distinguished based on marker expression, this relationship is not linear: minor differences in marker expression may have large functional consequences and vice versa.
+
+For the purpose of this analysis, we can imainge to use clustering two ways:
+
+1. Estimating the actual number of populations in the data, i.e. as much as possible get to the point where 1 cluster = 1 biological population.
+2. Using clustering as a way to reduce the size of the data, tending to err on the side of over-clustering, i.e. setting the clustering parameters so that the algorithm will produce more clusters than there are populations in the data, with the understanding that further analysis/visualization will reveal relationships between the clusters, possibly highlighting cases where a single population has been erroneously broken up into multiple redundant clusters.
+
+In this tutorial we will use the second approach. 
+
+Another important point is if and how data is pooled before clustering. This choice has very important consequences for what kind of downstream analysis we can do, particularly when we try to look at statistically significant differences across multiple samples. We will discuss these differences as they aris, for now we will cluster the data three different ways
+
+1. Each sample independetly
+2. Pooling data for each tissue type
+3. Pooling all the data together
+
+**[WE SHOULD PUT HERE THE CODE TO DO ALL OF THESE 3 THINGS]**
 
 Our example input directory called `Bone_marrow` contains five files:
 ```
@@ -393,6 +424,18 @@ landmarks.data <- load_landmarks_from_dir("gated/", asinh.cofactor = 5, transfor
 # Run the analysis. By default results will be save in a directory called "scaffold_result"
 run_scaffold_analysis(input.files, input.files[1], landmarks.data, col.names)
 ```
+
+
+# Visualization
+
+## Unsupervised visualization 
+The first task is to get and idea of the structure of the sample— what cells are in there? How many different populations can we identify as a first pass? What are the markers combinations that define such populations? Rather than using standard dimension-reduction methods PCA or tSNE, both of which have limitations, we will use **Force-directed graphs** to achieve this.
+
+Like other graphical methods, **Force-directed graphs** (_cite_) offer flexibility of visulization, as each node represents one cell (or cluster of cells) and each edge represents similarity between cells which can correspond to a variety of distance metrics or functions, but for our purposes we will use cosine (_link scgraphs package_).  In this layout the edges act as springs, whose strength is proportional to the weight of the edge (i.e. the similarity between the nodes). The algorithm then proceeds as a physical simulation by pulling together nodes that are similar (i.e. are connected by strong springs), and repelling dissimilar nodes. The end result is a layout where groups of similar cells are located close on the page, exactly what we set out to do for our visualization. (_cite Zunder:2015gp, Levine:2015ew, Samusik:2016ev, Spitzer:2015jd_?}
+
+* Number of neighbours=15
+
+
 
 #### Scaffold output
 
