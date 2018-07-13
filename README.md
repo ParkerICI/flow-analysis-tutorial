@@ -154,6 +154,9 @@ The GUI contains two tabs:
 
 **1. Normalize data:** used for beads gating and normalization 
 
+![normalizer_screenshot](https://github.com/ParkerICI/flow-analysis-tutorial/blob/federico/screenshots/normalizer_screenshot.PNG)
+
+
 This panel contains the following controls:
 
 - *Select beads type*: select the type of normalization beads that have been used for the experiment. Here we will use *Beta Beads (139, 141, 159, 175)*. The numbers indicate the beads channels used for normalization.
