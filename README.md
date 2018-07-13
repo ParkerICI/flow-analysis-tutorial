@@ -1,30 +1,23 @@
-# July-2018-single-cell-workshop
-This repository is a resource for PICI members performing end-to-end single-cell analysis.
 
-# Installation
-**The following R packages are required for this tutorial:**
-1. [devtools](https://github.com/r-lib/devtools)
-2. [flowCore](http://bioconductor.org/biocLite.R)
-3. [premessa](https://github.com/ParkerICI/premessa)
-4. [scgraphs](https://github.com/ParkerICI/scgraphs)
-5. [scfeatures](https://github.com/ParkerICI/scfeatures)
-6. [scaffold](https://github.com/ParkerICI/scaffold2)
+# Installing required software
+
+The following R packages are required for this tutorial:
+* [devtools](https://github.com/r-lib/devtools)
+* [flowCore](http://bioconductor.org/biocLite.R)
+* [premessa](https://github.com/ParkerICI/premessa)
+* [scgraphs](https://github.com/ParkerICI/scgraphs)
+* [scfeatures](https://github.com/ParkerICI/scfeatures)
+* [scaffold](https://github.com/ParkerICI/scaffold2)
 
 
-**Install a C++ compiler**
-Some steps require a working C++ compiler for installation- please refer to the appropriate option depending on your system.
+In order to install some of these packages, you must be able to compile C++ source packages on your system:
+  - Windows: Install the [Rtools](https://cran.r-project.org/bin/windows/Rtools/) package
+  - MacOS:  Install the XCode software from Apple that is freely available on the App Store. Depending on the specific version of XCode you are using you might also need to install the "Command Line Tools" package separately. Please refer to the XCode Documentation
+  - Linux: Install GCC. Refer to the documentation of your distribution to find the specific package name
 
-#### Mac OSX
-You need to install the XCode software from Apple that is freely available on the App Store. Depending on the specific version of XCode you are using you might also need to install the "Command Line Tools" package separately. Please refer to the Documentation for your XCode version
 
-#### Windows
-Install the [Rtools](https://cran.r-project.org/bin/windows/Rtools/) package, which is required for building R packaged from sources
+To install the R packages, open an R session and enter the following command lines:
 
-#### Linux
-Install GCC. Refer to the documentation of your distribution to find the specific package name
-
-### Install R Packages
-To install these packages, open an R session and enter the following command lines:
 ```R
 # This installs the Bioconductor flowCore package, which is used to read FCS files
 source("http://bioconductor.org/biocLite.R")
@@ -38,26 +31,43 @@ devtools::install_github("ParkerICI/scfeatures")
 devtools::install_github("ParkerICI/scgraphs")
 devtools::install_github("ParkerICI/scaffold2")
 ```
-## Usage
-In this tutorial, we will go step-by-step covering methods to analyze and visualize high-dimensional single cell data. After downloading the [datasets](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) (from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) in _Science_), we will go through the following steps:
+# Overview
 
-* [Panel editing](#panel-editing)
-* [Normalization](#normalization)
-* [De-barcoding](#de-barcoding)
+In this tutorial, we will go step-by-step covering methods to analyze and visualize high-dimensional single cell data. Wihle these methods are applicable to both flow and mass-cytometry data, this tutorial uses a mass-cytometry [dataset](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) (from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) in _Science_).
+
+We will go through the following steps which, save for a few exceptions, would also apply to a flow-cytometry dataset:
+
+* [Panel editing](#panel-editing) 
+* [Normalization](#normalization) (Mass Cytometry)
+* [De-barcoding](#de-barcoding) (Mass Cytometry)
 * [Gating](#gating)
-* [Visualization](#visualization)
+* [Visualization - running the analysis](#visualization---running-the-analysis)
   * [Unsupervised visualization](#unsupervised-visualization)
-  * [Supervised visualization](#supervised-visualization)
+  * [Scaffold maps](#scaffold-maps)
+* [Visualization - exploring the results](#visualization---exploring-the-results)
 * [Associating cell populations with endpoints of interest](#associating-cell-populations-with-endpoints-of-interest)
   
 
-Several tools described in this tutorial are built are GUI using the [shiny](https://shiny.rstudio.com/) framework. It is a good idea to familiarize yourself with starting and stopping this GUI applications. In general:
-* You start the application by invoking some function in your R console (e.g. premessa::normalizer_GUI())
+# Usage notes
+
+Several tools described in this tutorial are Graphical User Interfaces (GUIs) built using the [shiny](https://shiny.rstudio.com/) framework. It is a good idea to familiarize yourself with starting and stopping these GUI applications. In general:
+* You start the application by invoking some function in your R console, e.g. `premessa::normalizer_GUI()`
 * For several applications you will be requested to select a working directory, which contains all the files that are part of the analysis. To this end, immediately after you start the application, a file selection dialog will pop-up. Unfortuantely R does not provide the infrastructure to select *directories*. What you will do instead is selecting **any** *file* that's contained in the directory of intereset, and the corresponding directory will be selected
 * To stop the application switch back to your R console and press the `ESC` key. Note that while the application is running, it "hijacks" you R session, therefore anything you type in there will not have any effect. The only thing you can do in your R session while the application is running is pressing `ESC` to stop it
 
+Another general note before we start. There are two ways to invoke a function that is part of an R packages:
+* By invoking it directly
+```R
+premsessa::normalizer_GUI()
+```
+* By loading the package first
+```R
+library(premessa)
+normalizer_GUI()
+```
+In this tutorial we will use both formats, depending on how many functions we are calling from the same package (the second format saves a lot of typing if you are using multiple functions from the same pacakage in your analysis)
 
-## Panel editing
+# Panel editing
 Most analysis tools expect files that are part of the same analysis to have parameters and reagents named consistently. The [premessa](https://github.com/ParkerICI/premessa) includes a GUI tool that can be used to rename and synchronize panels across multiple FCS files.
 
 
@@ -65,12 +75,12 @@ Most analysis tools expect files that are part of the same analysis to have para
 
 ### Starting the panel editing GUI and selecting the working directory and example data
 
-You can start the panel editing GUI by typing the following commands in your R session:
+You can start the panel editing GUI by typing the following command in your R session:
 ```R
-library(premessa)
-paneleditor_GUI()
+premessa::paneleditor_GUI()
 ```
-This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory containing the data you want to analyze, and select any file in that directory. The directory itself will then become the working directory for the software.
+This will open a new web browser window, which is used for displaying the GUI, and a file selection dialog to select the working directory (see [Usage notes](#usage-notes))
+
 
 ![screen shot 2018-06-26 at 1 35 36 pm](https://user-images.githubusercontent.com/36977003/41937690-dac216a8-7945-11e8-95f2-ff9ad3a9dd9c.png)
 
@@ -78,8 +88,9 @@ To stop the software simply hit the "ESC" key in your R session.
 _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
 
-# Normalization (CyTOF only)
-The sensitivity of a CyTOF machine changes between different days (due to tuning) as well as during a single run due to variations in detector performance. To correct for this effect, [this](https://www.ncbi.nlm.nih.gov/pubmed/23512433) introduced the use of polystirene beads that can be used as a reference synthetic standard.
+
+# Normalization
+The sensitivity of a CyTOF machine changes between different days (due to tuning) as well as during a single run due to variations in detector performance. To correct for this problem, [this](https://www.ncbi.nlm.nih.gov/pubmed/23512433) publication introduced the use of polystirene beads that can be used as a reference synthetic standard (the beads are commercially available from [Fluidigm](https://www.fluidigm.com/))
 
 The normalization algorithm works by identifying a reference intensity for the beads channel and then applying a correction factor to the data so that the intensity at every specific time matches the reference intensity
 
@@ -87,7 +98,7 @@ This reference intensity can be calculated in one of two ways:
 * By calculating the median bead intensity for all the files that are part of the current analysis
 * By referring to a previously acquired set of beads, derived for instance from another experiment
 
-For the purpose of this tutorial we will use the first method. The workflow for this method invovles the following steps:
+For the purpose of this tutorial we will use the first method. The workflow involves the following steps:
 1. Bead identification through gating
 2. Data normalization
 3. Bead removal (optional)
@@ -128,8 +139,7 @@ Bone_marrow
 You can start the normalizer GUI by typing the following commands in your R session (see [usage](#usage) for general information about using the GUI):
 
 ```R
-library(premessa)
-normalizer_GUI()
+premessa::normalizer_GUI()
 ```
 
 Select any file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. Make sure that * ALL * files are selected in your window- this requires one-by-one selection from the drop down box.
@@ -181,7 +191,7 @@ During the beads removal step, all the events whose *beadDist* is less or equal 
 The plots in the bottom half of the panel help you select an appropriate cutoff. They display all the pairs of beads channels. Beads should appear as a population in the upper right corner (as they will be double-positives for all the channel pairs). The color of the points represent the distance from the beads population. You should choose a cutoff so that most of the bead events are below the cutoff, and most of the non-beads events are above it. The legend for the color scale is located above the plots.
 
 
-# De-barcoding (CyTOF only)
+# De-barcoding
 
 Barcoding (described in [this](https://www.ncbi.nlm.nih.gov/pubmed/25612231) publication) is a way to minimize staining variability across multiple samples. Each sample is labeled with a unique combination of metals before staining. All the samples are then pooled in a single tube, and stained in a single reaction, which guarantees that they are all exposed to the same amount of antibody.
 
@@ -330,50 +340,13 @@ This can be done by tissue type (for example pooling lymph node and bone marrow 
 
 Both clustering functions ouptut two types of data:
 - A summary table of per-cluster statistics
-- One or more RDS (R binary format) files containing cluster memberships for every cell event
+- One or more RDS (R binary format) files containing cluster memberships for every cell event. These files can be read and written using the R functions `readRDS` and `saveRDS`
 
-The details of the RDS output depend on the `output.type` option, please refer to the R documentation for more details. The summary table contains one row for each cluster, and one column for each channel in the original FCS files, with the table entries representing the median intensity of the channel in the corresponding cluster.
+The summary table contains one row for each cluster, and one column for each channel in the original FCS files, with the table entries representing the median intensity of the channel in the corresponding cluster.
 
 If multiple files have been pooled together this table also contains columns in the form `CD4@BM_a_cells.fcs`, which contain the median expression of `CD4`, calculated only on the cells in that cluster that came from sample `BM_a_cells.fcs`
 
-### Features generation
 
-This package also contains functions to rearrange the clustering output to calculate cluster features that can be used to build a predictive model (similar to the approach used in the (Citrus)[https://github.com/nolanlab/citrus] package). These functions operate on the clusters summary table described above, and require data to have been pooled together before clustering (i.e. the clustering should have been run with the `cluster_fcs_files_groups` function). In other words, if you want to build a model that includes data from the four files in the example above, you need to cluster them as a single group.
-
-The general approach for features generation for model building, is that you want to generate a table where each row represents a cluster feature (e.g. the abundance of a cluster, or the expression of a marker in a cluster), and each column represent an observation (e.g. a different sample), for which you have a categorical or continuous endpoint of interest that you want to predict using the cluster features.
-
-This package allows you to gather data that has been collected in multiple FCS files and, after clustering, integrate all the different pieces together to generate that matrix.
-
-The two main functions are (please refer to the R documentation for all the details):
-- `get_cluster_features`: this function takes a model specification and rearranges the clustering output to produce features that are suitable for model building
-- `multistep_normalize`: this function can be used to do complex normalization operations on the features
-
- Suppose that you have the following dataset !!
-
-|file   |timepoint  |condition  |subject    |label  |tumor_size |
-|-------|-----------|-----------|-----------|-------|-----------|
-|A.fcs  |baseline   |stim1      |subject1   |R      |0.1        |
-|B.fcs  |baseline   |stim2      |subject1   |R      |0.1        |
-|C.fcs  |baseline   |unstim     |subject1   |R      |0.1        |
-|D.fcs  |week8      |stim1      |subject1   |R      |1.5        |
-|E.fcs  |week8      |stim2      |subject1   |R      |1.5        |
-|F.fcs  |week8      |unstim     |subject1   |R      |1.5        |
-|G.fcs  |baseline   |stim1      |subject2   |NR     |0.2        |
-|H.fcs  |baseline   |stim2      |subject2   |NR     |0.2        |
-|I.fcs  |baseline   |unstim     |subject2   |NR     |0.2        |
-|L.fcs  |week8      |stim1      |subject2   |NR     |3.2        |
-|M.fcs  |week8      |stim2      |subject2   |NR     |3.2        |
-|N.fcs  |week8      |unstim     |subjcet2   |NR     |3.2        |
-
-There are multiple ways that you could envision leveraging this data for model construction. The two key parameters of `get_cluster_features` that allow you to specify different models are:
-- `predictors`: this specifies which variables are going to be used as predictors
-- `endpoint.grouping`: this specifies which variables are used to group together files that are associated with the same endpoint
-
-************* A few examples should clarify how to use this function ************* (ADD)
-
-#### Example model 1
-
-(create from our dataset?)
 
 ## Creating an unsupervised visualization in R
 
@@ -426,24 +399,41 @@ run_scaffold_analysis(input.files, input.files[1], landmarks.data, col.names)
 ```
 
 
-# Visualization
+# Visualization - running the analysis
+
+The first task is to get and idea of the structure of the sample: what cells are in there? How many different populations can we identify as a first pass? What are the markers combinations that define such populations?
+
+There are several ways to visualize in 2D data that exists in a much higher number of dimensions. For the purpose of this tutorial we will use methods that represent the data as a graph: each node represents a cluster of cells (or a even a single cell) and connection between the nodes (edges) are associated with a numeric value (weight) that represents the similarity between the cells. 
+
+From this generic idea we are going to derive two different representation:
+1. An [unsupervised visualization](#unsupervised-visualization)
+2. A supervised visualization, called a [Scaffold](#scaffold-maps) map
+
+Besides the idea of representing data as a graph, these two approaches are also unified by the use of a **force-directed layout** to display the graph. The term layout in this case refers to the way nodes and edges are arranged on the display (a graph can be arranged on the page in an infinite number of ways, while still mantaining the same structure, i.e. the same nodes and eges). In a force-directed layout, edges act as springs, whose strength is proportional to the weight of the edge (i.e. the similarity between the nodes). The algorithm then proceeds as a physical simulation by pulling together nodes that are similar (i.e. are connected by strong springs), and repelling dissimilar nodes. The end result is a layout where groups of similar clusters are located close on the display.
 
 ## Unsupervised visualization 
-The first task is to get and idea of the structure of the sample— what cells are in there? How many different populations can we identify as a first pass? What are the markers combinations that define such populations? Rather than using standard dimension-reduction methods PCA or tSNE, both of which have limitations, we will use **Force-directed graphs** to achieve this.
 
-Like other graphical methods, **Force-directed graphs** (_cite_) offer flexibility of visulization, as each node represents one cell (or cluster of cells) and each edge represents similarity between cells which can correspond to a variety of distance metrics or functions, but for our purposes we will use cosine (_link scgraphs package_).  In this layout the edges act as springs, whose strength is proportional to the weight of the edge (i.e. the similarity between the nodes). The algorithm then proceeds as a physical simulation by pulling together nodes that are similar (i.e. are connected by strong springs), and repelling dissimilar nodes. The end result is a layout where groups of similar cells are located close on the page, exactly what we set out to do for our visualization. (_cite Zunder:2015gp, Levine:2015ew, Samusik:2016ev, Spitzer:2015jd_?}
+In this mode of analysis the graph is generated by exclusively using the clusters in your dataset. Similar to other methods (e.g. tSNE), each time the layout algorithm is ran, it generates a different result. This means that, if you want to visualize the similarity and differences between mulitple samples, you need to construct a single graph that contains data from all the samples. If you did not do that, you would not be able to compare between separate graphs, as the layout does not have any *orientation* and changes every time the method is run (i.e. what is top left in one graph, has no relationship with what is top left in another one).
 
-* Number of neighbours=15
+**[INCLUDE HERE CODE TO DO THIS WITH OUR DATASET]**
+
+The `scgraphs::get_unsupervised_graph_from_file` will return a graph object that you can save as a `graphml` file using `igraph::write.graph`. It will also create a folder called `clusters_data` in your current directory. This folder is used for visualization with `scvis` (see below) and contains a directory for each one of the original cluster fils, with all the clusters split into individual `rds` files
 
 
+## Scaffold maps
 
-#### Scaffold output
+Scaffold maps were introduced in [this](https://www.ncbi.nlm.nih.gov/pubmed/26160952) publication. They are still based on the idea of represnting data as a graph, laid out with a force-directed layout. However this time the graph include two types of nodes:
 
-By the default the output of the analysis will be saved in a folder called `scaffold_result`. The directory will contain a `graphml` file for each Scaffold map and two sub-folders called `clusters_data` and `landmarks_data`.
+1. Clusters nodes, the same as what we saw before
+2. Landmark nodes, this are derived from gated data, and represent known canonical populations (e.g. T cells, B cells etc.)
 
-These folders contain downsampled single-cell data for the clusters and landmarks, to be used for visualization. The `clusters_data` folder will contain a separate sub-folder for each `graphml` file, containing the data specific to that sample. The data is split in multiple `rds` files, one for each cluster (or landmark in `landmarks_data`). 
+The edges in this graph represent the similarity not just between the cluster nodes, but also between the clusters and the landmark nodes. Therefore the position of the clusters in the graph represents their similarity to the canonical populations, and therefore is a good indication of the identity, i.e. if a cluster is very close the B cell landmark node, it is probably a B cell.
 
-If the Scaffold analysis was constructed from data that was pooled before clustering (i.e. using `scfeatures::cluster_fcs_files_groups`), the `clusters_data` folder will also contain a subfolder called `pooled`, containing the pooled data, in addition to the sample-specific folders described above.
+Also with this approach multiple samples can be processed independently because the visualization is oriented by the position of the landmark nodes, which is determined at the beginning of the analysis, and then fixed for all the samples. Maps derived from different sample will contain different cluster nodes, but the orientation of the display will be consistent, as the landmark nodes are identical and in the same position. This provides a very immediate way to visualize differences between the structure of different samples.
+
+**[INCLUDE HERE CODE TO DO THIS WITH OUR DATASET]**
+
+The `scgraphs::run_scaffold_analysis` will create an ouptut directory (by default called `scaffold_result`) with a separate `graphml` file for each one of the `clustered.txt` file provided as input, containing the Scaffold map for that sample. The directory will also contain two sub-folders called `clusters_data` and `landmarks_data`. Similarly to what happened for the unsupervised visualization above, these folders contain downsampled single-cell data for the clusters and landmarks, to be used for visualization. The `clusters_data` folder will contain a separate sub-folder for each `graphml` file, containing the data specific to that sample. The data is split in multiple `rds` files, one for each cluster (or landmark in `landmarks_data`). If the Scaffold analysis was constructed from data that was pooled before clustering (i.e. using `scfeatures::cluster_fcs_files_groups`), the `clusters_data` folder will also contain a subfolder called `pooled`, containing the pooled data, in addition to the sample-specific folders described above.
 
 ### Using the GUI
 
@@ -453,82 +443,70 @@ To launch the GUI type the following in your R console
 
 ```R
 scgraphs::scgraphs_GUI()
-``'
+```
 
 Like in earlier steps, this will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory (computer location) containing the data you want to analyze, and select any file in that directory. In this example, select a file from the [scfeatures](#scfeatures) output before. The directory itself will then become the working directory for the software. Make sure that * ALL * files are selected in your window- this requires one-by-one selection from the drop down box. Note: if the GUI does not launch, hit 'esc' and try to run the code again.
 
 
-##Scaffold
+# Visualization - exploring the results
 
-The `scaffold2` R package (installed previously) puts together with all the required dependencies to run your Scaffold analysis. If evertyhing was successful you should be able to start the GUI with the following commands:
+Now that we have created all these `graphml` files containing a 2D representation of our high-dimensional data, is time to actually visualize and explore their contents. To do so we will use the `scaffold2` package, whose GUI can be started as follows
+
 
 ```R
-library(scaffold2)
-scaffold2()
+scaffold2::scaffold2()
 ```
-Again, note that if it nothing pops up on your screen, or to stop the GUI simply hit the `ESC` key in your R session.
 
-# Usage
-
-When you launch the GUI you will be prompted to select a file. You can select *any* file in what you want to be your working directory and this will set the working directory for the remainder of the session.
-
-The working directory must contain all the `graphml` files you want to visualize, plus a sub-folder named `clusters_data` containing the single-cell data for each cluster. If the graphml files represent Scaffold maps, a sub-folder called `landmarks_data` must also be present. 
-
-If the `graphml` files were generated using the [scgraphs](https://github.com/ParkerICI/scgraphs) package these directories were generated for you as long as the `process.clusters.data` option was set to `TRUE` in `scgraphs::run_scaffold_analysis` or `scgraphs::get_unsupervised_graph_from_files` (please refer to the documentation of the `scgraphs` packages for details)
+Similar to what happened with the other GUIs, upon launch you will be prompted to select a file. You can select *any* file in what you want to be your working directory and this will set the working directory for the remainder of the session.
 
 Once the working directory has been selected two browser windows will be opened: a main window containing the graph visualization, and a separate plotting window. Please note the following, depending on your browser settings:
 - If your browser is configured to block pop-ups you need to allow pop-ups coming from the address `127.0.0.1:8072` (8072 is the default `scaffold2` port, you will have to enable pop-ups coming from a different port if you change this default)
 - If your browser is configured to open new windows in a new tab, the last tab shown in the browser will be the plotting window, which is initially empty. The main `scaffold2` interface will be in a different tab
 
-## Description of the GUI functionality
+The functionality of the GUI is described in detail in the README of the scaffold2 package.
 
-- **Choose a graph**: select the `graphml` file you want to visualize from a list of files contained in your working directory
+**[INCLUDE HERE SOME EXAMPLES OF INFORMATIVE VISUALIZATIONS FOR THIS DATA, E.G. DIFFERENCES BETWEEN DIFFERENT TISSUES]
 
-You can interact with the graph using the mouse as follows:
-- Scrolling: zoom in/out. 
-- Left click + drag: panning
-- Click on a node + Shift key: add the node to the current selection, or create a new selection if none existed (selected nodes are displayed in red)
-- Left click + drag + Alt key: select all nodes inside a rectangle. To clear the current selection use this key combination to create a selection on an empty area of the graph
+# Identifying features associated with an endpoint of interest
 
-The appearence of the graph can be modified with the following controls:
+The final step in the analysis consists in finding cluster features that are associated with an endpoint of interest. We will separate this problem in two parts:
 
-- **Active sample**: whether to display data for All the samples (i.e. the pooled data) or a specific sample (this control is only available if the graph represents multiple samples, i.e. it was generated from pooled clustering). Selecting a different sample changes the size and color of the nodes, to reflect statistics calculated using only data from the current active sample.
-- **Display edges**: select which edges to display:
-   - All: displays all the edges
-   - Highest scoring: for each node, display the highest scoring connection to a landmark (i.e. this is the most similar landmark)
-   - Inter cluster: only display edges between clusters
-   - To landmark: only display edges between clusters and landmarks
-- **Nodes color**: use this dropdown to color the nodes according to the expression of a specific marker, or with "Default" colors (clusters in Blue, landmarks in red)
-- **Stats type**: only available if the graph represents mulitple samples:
-  - Absolute: the node colors represent the absolute value of the selected marker in the active sample
-  - Ratio: the node colors represent the ratio between the value of the selected marker in the active sample and the value of the selected marker in the sample selected from the **Stats relative to** dropdown. The ratio is calculated on the asinh transformed values
-  - Difference: the node colors represent the difference between the value of the selected marker in the active sample and the value of the selected marker in the sample selected from the **Stats relative to** dropdown. The difference is calculated on the asinh transformed values
-- **Stats relative to**: only available if the graph represents multiple samples and **Stats type** is different from `Absolute`. The sample with respect to which stats are calculated (see **Stats type**)
-- **Number of colors**: number of colors to use in the color scale
-- **Under**: the color to use for values that are below the minimum of the scale
-- **Over**: the color to use for value that are above the maximum of the scale
-- **Min**: the color corresponding to the minimum of the scale
-- **Mid**: the color corresponding to the midpoint of the scale (only available if the number of colors is 3)
-- **Max**: the color corresponding to the maximum of the scale
-- **Color scale midpoint**: the value corresponding to the midpoint of the color scale (only available if the number of colors is 3)
-- **Color scale limits**: the numerical values that correspond to the domain of the color scale
-- **Color scale min**: the minimum value available in the **Color scale limits** slider
-- **Color scale max**: the maximum value available in the **Color scale limits** slider
-- **Nodes size**: select whether you want the size of the nodes to be constant (Default) or Proportional to the number of cells in each cluster. 
-- **Minimum / Maximum / Landmark node size**: the minimum and maximum size for the cluster and the size of the landmark (red) nodes
-- **Reset graph position**: this button will reset the graph to its initial position, which is intended to display most of the nodes in a single image
-- **Toggle landmark labels**: toggle the display of the landmark labels on/off
-- **Toggle cluster labels**: toggle the display of the cluster labels on/off
-- **Export selected clusters**: click this button to export the events in the selected clusters in a separate FCS file. For this to work, the original RData files corresponding to the clustered files in use must be located in the working directory. A new FCS file will be created in the working directory, with a name starting with *scaffold_export*, and ending with a random string of alpha-numeric characters, to prevent naming conflicts.
+1. Re-arranging the data in a table that can be used for statistical analysis
+2. Using this table as input to a statistical modeling function
 
-One of the most useful ways to inspect a cluster is to plot the expression values for the cells that comprise the cluster. The controls below allow you to control the appeareance of the plot. Only data for the clusters that have been selected will be plotted. If the graph represents a Scaffold map, the plot will also include the data for the landmarks that are connected to the selected clusters
+For part 1 we are going to use the `scfeatures` package again. This package contains functions to rearrange the clustering output to calculate cluster features that can be used to build a predictive model (similar to the approach used in the (Citrus)[https://github.com/nolanlab/citrus] package). These functions operate on the clusters summary table contained in the `clustered.txt` files.
 
-- **Plot type**: the type of plot to display. Either a boxplot, a density plot, or a scatteplot (biaxial).
-- **Facet by**: only availabe if the graph represents data from multiple samples. Whether the plot should be faceted by Sample or Variable, i.e. wether each Sample or each Variable should be its separate plot in the panel
-- **Pool clusters data**: whether to pool all the data from the selected clusters for plotting. If the option is not selected, each cluster will be plotted individually as a separate boxplot, or density plot. Selecting this option will pool all the clusters data together for plotting. Note that if this option is selected, and the graph represents data from multiple samples, the data for the different samples will be pooled as well
-- **Pool samples data**: only available if the graph represents data from multiple samples and **Pool clusters data** is not selected. Whether to pool the data from multiple samples for plotting.
-- **Markers to plot**: Select which markers you want to display in the plot.
-- **Samples to plot**: only available if the graph represents data from multiple samples. If this is left empty, the pooled data is plotted, otherwise only the data from the specified samples
-- **Plot clusters**: plot the selected clusters. The plots appear in the separate plotting window
+A fundamental point to note is that this process requires data to have been pooled together before clustering (i.e. the clustering should have been run with the `cluster_fcs_files_groups` function). In other words, if you want to build a model that includes data from multiple samples you need cluster them as a single group. This is because you need to be able to identify the same cluster across multiple samples. If you did not pool data together, there would not be any guarantee that cluster 1 in sample X corresponds to cluster 2 in sample Y
 
+The general approach for features generation for model building, is that you want to generate a table where each row represents a cluster feature (e.g. the abundance of a cluster, or the expression of a marker in a cluster), and each column represent an observation (e.g. a different sample), for which you have a categorical or continuous endpoint of interest that you want to predict using the cluster features.
 
+The two main functions are (please refer to the R documentation for all the details):
+- `get_cluster_features`: this function takes a model specification and rearranges the clustering output to produce features that are suitable for model building
+- `multistep_normalize`: this function can be used to do complex normalization operations on the features
+
+ Suppose that you have the following dataset !!
+
+|file   |timepoint  |condition  |subject    |label  |tumor_size |
+|-------|-----------|-----------|-----------|-------|-----------|
+|A.fcs  |baseline   |stim1      |subject1   |R      |0.1        |
+|B.fcs  |baseline   |stim2      |subject1   |R      |0.1        |
+|C.fcs  |baseline   |unstim     |subject1   |R      |0.1        |
+|D.fcs  |week8      |stim1      |subject1   |R      |1.5        |
+|E.fcs  |week8      |stim2      |subject1   |R      |1.5        |
+|F.fcs  |week8      |unstim     |subject1   |R      |1.5        |
+|G.fcs  |baseline   |stim1      |subject2   |NR     |0.2        |
+|H.fcs  |baseline   |stim2      |subject2   |NR     |0.2        |
+|I.fcs  |baseline   |unstim     |subject2   |NR     |0.2        |
+|L.fcs  |week8      |stim1      |subject2   |NR     |3.2        |
+|M.fcs  |week8      |stim2      |subject2   |NR     |3.2        |
+|N.fcs  |week8      |unstim     |subjcet2   |NR     |3.2        |
+
+There are multiple ways that you could envision leveraging this data for model construction. The two key parameters of `get_cluster_features` that allow you to specify different models are:
+- `predictors`: this specifies which variables are going to be used as predictors
+- `endpoint.grouping`: this specifies which variables are used to group together files that are associated with the same endpoint
+
+************* A few examples should clarify how to use this function ************* (ADD)
+
+#### Example model 1
+
+(create from our dataset?)
