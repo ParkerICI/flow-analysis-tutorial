@@ -219,7 +219,7 @@ Upon launching the GUI you will have access to the following controls:
   - *Select x axis*: select the channel to be displayed on the x axis
   - *Select y axis*: select the channel to be displayed on the y axis
 - *Save files*: hitting this button will apply the current settings, performed the debarcoding, and save the resulting output files
-![screen shot 2018-06-26 at 3 01 26 pm](https://user-images.githubusercontent.com/36977003/41941778-d5cb090a-7951-11e8-9d93-9a103d5b2b66.png)
+![screen shot 2018-07-14 at 1 30 15 pm](https://user-images.githubusercontent.com/36977003/42765430-05175fee-88e6-11e8-8535-15e63136ee65.png)
 
 ### Plot types
 
