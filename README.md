@@ -88,7 +88,7 @@ premessa::paneleditor_GUI()
 This will open a new web browser window, which is used for displaying the GUI, and a file selection dialog to select the working directory (see [Usage notes](#usage-notes))
 
 
-![screen shot 2018-06-26 at 1 35 36 pm](https://user-images.githubusercontent.com/36977003/41937690-dac216a8-7945-11e8-95f2-ff9ad3a9dd9c.png)
+![panel editor](screenshots/panel_editor.png)
 
 To stop the software simply hit the "ESC" key in your R session.
 _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
@@ -250,7 +250,7 @@ Upon launching the GUI you will have access to the following controls:
   - *Select x axis*: select the channel to be displayed on the x axis
   - *Select y axis*: select the channel to be displayed on the y axis
 - *Save files*: hitting this button will apply the current settings, performed the debarcoding, and save the resulting output files
-![screen shot 2018-07-14 at 1 30 15 pm](https://user-images.githubusercontent.com/36977003/42765430-05175fee-88e6-11e8-8535-15e63136ee65.png)
+![debarcoding](screenshots/debarcoding.png)
 
 ### Plot types
 
