@@ -259,7 +259,7 @@ There are four types of visualization that allow you to inspect the results of t
 - *Separation*
   - *Top*: A histogram of the separation between the positive and negative barcode channels for all the events
   - *Bottom*: Barcode yields as a function of the separation threshold. As the threshold increases, the number of cells assigned to each sample decreases, and more events are left unassigned. The currently selected threshold is displayed as a vertical red line. **This is probably the most important plot**. The ideal separation threshold is usually found right before the end of the plateau in barcode yields, before the curve drops dramatically
-**[PUT SCREENSHOT OF THE PLOT HERE]**
+![Separation_plot_BM](https://github.com/ParkerICI/flow-analysis-tutorial/blob/master/screenshots/Separation_plot_BM.png)
 
 - *Event*
   - *Top*: Bargraph or cell yields for each sample after debarcoding, given the current settings
