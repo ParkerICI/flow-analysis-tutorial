@@ -216,15 +216,32 @@ After the data for this pooled sample is acquired, the software goes through eac
 
 It is important to note that barcoding only addresses variability that is due to staining differences. It does **not** account for variation due to instrument setup or sensitivity (you need to use [normalization](#normalization) for that)
 
-Assuming the FCS file *BM_cells.fcs* is located in the directory *Science Data*, and the barcode key defines 3 barcoded populations (A, B, C), the following directories and output files will be created at the end of the debarcoding process:
+Assuming the FCS file *BM_cells.fcs* is located in the directory *Science Data*, and the barcode key defines 20 barcoded populations (1-20), the following directories and output files will be created at the end of the debarcoding process:
 
 ```
 Science Data
 |--- BM_cells.fcs
 |--- debarcoded
-     |--- BM_cells.A.fcs.fcs
-     |--- BM_cells.B.fcs.fcs
-     |--- BM_cells.C.fcs
+     |--- BM_cells.Pop01.fcs
+     |--- BBM_cells.Pop02.fcs
+     |--- BM_cells.Pop03.fcs
+     |--- BM_cells.Pop04.fcs
+     |--- BBM_cells.Pop05.fcs
+     |--- BM_cells.Pop06.fcs
+     |--- BM_cells.Pop07.fcs
+     |--- BBM_cells.Pop08.fcs
+     |--- BM_cells.Pop09.fcs
+     |--- BM_cells.Pop10.fcs
+     |--- BBM_cells.Pop11.fcs
+     |--- BM_cells.Pop12.fcs
+     |--- BM_cells.Pop13.fcs
+     |--- BBM_cells.Pop14.fcs
+     |--- BM_cells.Pop15.fcs
+     |--- BM_cells.Pop16.fcs
+     |--- BBM_cells.Pop17.fcs
+     |--- BM_cells.Pop18.fcs
+     |--- BM_cells.Pop19.fcs
+     |--- BBM_cells.Pop20.fcs
      |--- BM_cells_Unassigned.fcs
 ```
 
