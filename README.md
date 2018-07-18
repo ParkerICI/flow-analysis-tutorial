@@ -338,7 +338,10 @@ If the choice was to run each sample independently, the following R code would a
 # to the $PxS FCS keyword). When descriptions are missing the channel names are used
 # instead ($PxN keyword)
 
-col.names <- c("(CD4)", "(CD8)", "((CD3)")
+
+col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", "CD19", "120g8", "CD8", "Ly6C",
+        "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit",
+        "CD150", "CD25", "TCRb", "CD43", "CD64", "CD138", "CD103", "IgM", "CD44", "MHCII")
 
 # Please refer to the documentation of this function for an explanation of the parameters
 # and for a description of the output type. The output is saved on disk, and the function
