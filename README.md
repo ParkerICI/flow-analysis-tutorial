@@ -109,7 +109,7 @@ For the purpose of this tutorial we will use the first method. The workflow invo
 2. Data normalization
 3. Bead removal (optional)
 
-Assuming you're using the example [Science data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as your working directory and it contains two FCS files called BM_cells.FCS and SPL_cells.FCS, at the end of the workflow the following directory structure and output files will be generated:
+Assuming you're using the example [Science data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as your working directory and it contains four FCS files called BM_cells.FCS, SPL_cells.FCS, LN_cells.FCS and BLD_cells.FCD, at the end of the workflow the following directory structure and output files will be generated:
 
 ```
 Science data
@@ -160,7 +160,7 @@ You can start the normalizer GUI by typing the following commands in your R sess
 premessa::normalizer_GUI()
 ```
 
-Select any file from the [Bone marrow data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. 
+Select any file from the [Science dataset](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. 
 
 The GUI contains two tabs:
 
