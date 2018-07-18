@@ -71,8 +71,6 @@ We will go through the following steps which, save for a few exceptions, would a
 * [Associating cell populations with endpoints of interest](#associating-cell-populations-with-endpoints-of-interest)
   
 
-
-
 # Panel editing
 Most analysis tools expect files that are part of the same analysis to have parameters and reagents named consistently. The [premessa](https://github.com/ParkerICI/premessa) includes a GUI tool that can be used to rename and synchronize panels across multiple FCS files.
 
@@ -166,7 +164,7 @@ The GUI contains two tabs:
 
 **1. Normalize data:** used for beads gating and normalization 
 
-![normalizer_screenshot](screenshots/normalizer.PNG)
+![normalizerGUI_ScienceDataset](https://github.com/ParkerICI/flow-analysis-tutorial/blob/master/screenshots/normalizerGUI_ScienceDataset.png)
 
 
 This panel contains the following controls:
@@ -204,9 +202,6 @@ During the beads removal step, all the events whose *beadDist* is less or equal 
 The plots in the bottom half of the panel help you select an appropriate cutoff. They display all the pairs of beads channels. Beads should appear as a population in the upper right corner (as they will be double-positives for all the channel pairs). The color of the points represent the distance from the beads population. You should choose a cutoff so that most of the bead events (orange) are below the cutoff, and most of the non-beads events (blue) are above it. The legend for the color scale is located above the plots.
 
 ![beads removal](screenshots/beads_removal.PNG)
-
-**[PUT UPDATED SCREENSHOT HERE]**
-
 
 # De-barcoding
 
@@ -339,9 +334,7 @@ If the choice was to run each sample independently, the following R code would a
 # instead ($PxN keyword)
 
 
-col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", "CD19", "120g8", "CD8", "Ly6C",
-        "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit",
-        "CD150", "CD25", "TCRb", "CD43", "CD64", "CD138", "CD103", "IgM", "CD44", "MHCII")
+col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", "CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64", "CD138", "CD103", "IgM", "CD44", "MHCII")
 
 # Please refer to the documentation of this function for an explanation of the parameters
 # and for a description of the output type. The output is saved on disk, and the function
