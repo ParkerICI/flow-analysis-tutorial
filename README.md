@@ -218,25 +218,25 @@ Science Data
 |--- BM_cells.fcs
 |--- debarcoded
      |--- BM_cells.Pop01.fcs
-     |--- BBM_cells.Pop02.fcs
+     |--- BM_cells.Pop02.fcs
      |--- BM_cells.Pop03.fcs
      |--- BM_cells.Pop04.fcs
-     |--- BBM_cells.Pop05.fcs
+     |--- BM_cells.Pop05.fcs
      |--- BM_cells.Pop06.fcs
      |--- BM_cells.Pop07.fcs
-     |--- BBM_cells.Pop08.fcs
+     |--- BM_cells.Pop08.fcs
      |--- BM_cells.Pop09.fcs
      |--- BM_cells.Pop10.fcs
-     |--- BBM_cells.Pop11.fcs
+     |--- BM_cells.Pop11.fcs
      |--- BM_cells.Pop12.fcs
      |--- BM_cells.Pop13.fcs
-     |--- BBM_cells.Pop14.fcs
+     |--- BM_cells.Pop14.fcs
      |--- BM_cells.Pop15.fcs
      |--- BM_cells.Pop16.fcs
-     |--- BBM_cells.Pop17.fcs
+     |--- BM_cells.Pop17.fcs
      |--- BM_cells.Pop18.fcs
      |--- BM_cells.Pop19.fcs
-     |--- BBM_cells.Pop20.fcs
+     |--- BM_cells.Pop20.fcs
      |--- BM_cells_Unassigned.fcs
 ```
 
