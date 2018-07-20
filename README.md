@@ -335,7 +335,10 @@ If the choice was to run each sample independently (option 1), the following R c
 # instead ($PxN keyword)
 
 
-col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", "CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64", "CD138", "CD103", "IgM", "CD44", "MHCII")
+col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", 
+"CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", 
+"CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64",
+"CD138", "CD103", "IgM", "CD44", "MHCII")
 
 # Please refer to the documentation of this function for an explanation of the parameters
 # and for a description of the output type. The output is saved on disk, and the function
