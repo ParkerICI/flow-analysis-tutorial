@@ -314,7 +314,7 @@ Another important point is if and how data is pooled before clustering. This cho
 2. Pooling data for each tissue type
 3. Pooling all the data together
 
-Our example input directory called `singlets` contains 80 files with the following naming scheme:
+Our example subdirectory directory called `singlets` contains 80 files with the following naming scheme:
 ```
 - BM_cells_normalized_beadsremoved_Pop01_singlets.fcs
 - LN_cells_normalized_beadsremoved_Pop01_singlets.fcs
@@ -344,14 +344,14 @@ col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23",
 # and for a description of the output type. The output is saved on disk, and the function
 # simply return the list of files that have been clustered
 cluster_fcs_files_in_dir("singlets", num.cores = 1, col.names = col.names, num.clusters = 200,
-    asinh.cofactor = 5, output.type = "directory")
+    asinh.cofactor = 5)
 
 # You can also specify a list of files directly using the cluster_fcs_files function,
 # which takes essentially the same arguments
 files.list <- c("singlets/BM_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/LN_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs")
 
 cluster_fcs_files(files.list, num.cores = 1, col.names = col.names, num.clusters = 200,
-    asinh.cofactor = 5, output.type = "directory")
+    asinh.cofactor = 5)
 ```
 
 If instead you wanted to pool some files together by tissue type (options 2) you would setup the run as follows:
@@ -445,7 +445,7 @@ files.groups <- list(
          "BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs"))
 
 cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
-                         num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+                         num.clusters = 200, asinh.cofactor = 5)
 ```
 
 If instead you wanted to pool together all files together (option 3),  you would setup the run as follows:
@@ -536,7 +536,7 @@ files.groups <- list(
                    "SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs",
 
 cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
-    num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+    num.clusters = 200, asinh.cofactor = 5)
       
 ```
 
