@@ -282,7 +282,6 @@ There are four types of visualization that allow you to inspect the results of t
   - *Top*: Bargraph of cell yields for each sample after debarcoding, given the current setting
   - *Bottom*: a matrix of scatterplots of barcode channel intensities for the selected sample. All possible combinations are displayed, and the channels represented on the rows and columns are identified by the names on the axes of the bottom and left-most plots. The plots on the diagonal display the distribution of intensity values for the corresponding channel
 
-
 # Gating
 
 Whatever analysis you are thinking of doing, some amount of gating is usually required. At a minimum you usually want to remove doublets and dead cells.
@@ -299,33 +298,35 @@ Clustering, i.e. the process of grouping together cells that express similar com
 
 Ideally the concept of cluster would correspond to the biological concept of population, but this may very well not happen in practice. A cellular population is defined by function (i.e. two cells belong to two separate populations if they have different functional properties). Therefore a cluster may not correspond to a population because:
 
-1. clustering itself is a not a well-defined computational problem, and no clustering algorithm is perfect
-2. while different populations have different functions and they can be distinguished based on marker expression, this relationship is not linear: minor differences in marker expression may have large functional consequences and vice versa.
+1. Clustering itself is a not a well-defined computational problem, and no clustering algorithm is perfect
+2. While different populations have different functions and they can be distinguished based on marker expression, this relationship is not linear: minor differences in marker expression may have large functional consequences and vice versa.
 
 For the purpose of this analysis, we can imainge to use clustering two ways:
 
 1. Estimating the actual number of populations in the data, i.e. as much as possible get to the point where 1 cluster = 1 biological population.
 2. Using clustering exclusively as a mean to reduce the size of the data, tending to err on the side of over-clustering, i.e. setting the clustering parameters so that the algorithm will produce more clusters than there are populations in the data, with the understanding that further analysis/visualization will reveal relationships between the clusters, possibly highlighting cases where a single population has been erroneously broken up into multiple redundant clusters.
 
-In this tutorial we will use the second approach. 
+In this tutorial we will apply the second approah using the [groppolo](https://github.com/ParkerICI/grappolo]) R package.
 
-Another important point is if and how data is pooled before clustering. This choice has very important consequences for what kind of downstream analysis we can do, particularly when we try to look at statistically significant differences across multiple samples. We will discuss these differences as they arise, for now we will cluster the data three different ways
+Another important point is if and how data is pooled before clustering. This choice has very important consequences for what kind of downstream analysis we can do, particularly when we try to look at statistically significant differences across multiple samples. We will discuss these differences as they arise, for now we will cluster the data three different ways:
 
 1. Each sample independetly
 2. Pooling data for each tissue type
 3. Pooling all the data together
 
-**[WE SHOULD PUT HERE THE CODE TO DO ALL OF THESE 3 THINGS]**
-
-Our example input directory called `Science Data` contains five files:
+Our example input directory called `singlets` contains 80 files with the following naming scheme:
 ```
-- BM_a_cells.fcs
-- BM_b_cells.fcs
-- BM_c_cells.fcs
-- BM_d_cells.fcs
-- BM_e_cells.fcs
+- BM_cells_normalized_beadsremoved_Pop01_singlets.fcs
+- LN_cells_normalized_beadsremoved_Pop01_singlets.fcs
+- SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs
+- BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs
+...
+- BM_cells_normalized_beadsremoved_Pop20_singlets.fcs
+- LN_cells_normalized_beadsremoved_Pop20_singlets.fcs
+- SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs
+- BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs
 ```
-If the choice was to run each sample independently, the following R code would apply:
+If the choice was to run each sample independently (option 1), the following R code would apply:
 
 ```R
 # These are the names of the columns in the FCS files that you want to use for clustering. 
@@ -339,30 +340,202 @@ col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23",
 # Please refer to the documentation of this function for an explanation of the parameters
 # and for a description of the output type. The output is saved on disk, and the function
 # simply return the list of files that have been clustered
-cluster_fcs_files_in_dir("Bone_marrow", num.cores = 1, col.names = col.names, num.clusters = 200,
+cluster_fcs_files_in_dir("singlets", num.cores = 1, col.names = col.names, num.clusters = 200,
     asinh.cofactor = 5, output.type = "directory")
 
 # You can also specify a list of files directly using the cluster_fcs_files function,
 # which takes essentially the same arguments
-files.list <- c("Bone_marrow/BM_a_cells.fcs", "Bone_marrow/BM_b_cells.fcs")
+files.list <- c("singlets/BM_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/LN_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs")
+
 cluster_fcs_files(files.list, num.cores = 1, col.names = col.names, num.clusters = 200,
     asinh.cofactor = 5, output.type = "directory")
 ```
 
-If instead you wanted to pool some files together, you would setup the run as follows
+If instead you wanted to pool some files together by tissue type (options 2) you would setup the run as follows:
+
+```R
+# Assuming for instance that you wanted to pool the .FCS into 4 groups Bone Marrow (BM.poled), Spleen (SPL.pooled), Lymph Node (LN.pooled), and Blood (BL.pooled) corresponding to tissue type (once again please refer to the documentation for details)
+
+files.groups <- list(
+  BM.pooled= c("BM_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+        "BM_cells_normalized_beadsremoved_Pop20_singlets.fcs")
+  
+  SPL.pooled = c("SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop10_singlets.fcs",       
+         "SPL_cells_normalized_beadsremoved_Pop11_singlets.fcs"
+         "SPL_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+         "SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs")
+    
+    LN.pooled = c("LN_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+         "LN_cells_normalized_beadsremoved_Pop20_singlets.fcs",
+  
+    BLD.pooled = c("BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+         "BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs"))
+
+cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
+                         num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+```
+
+If instead you wanted to pool together all files together (option 3),  you would setup the run as follows:
 
 ```R
 # Assuming for instance that you wanted to pool BM_a_cells.fcs and BM_b_cells.fcs in group 1, and BM_c_cells.fcs, 
 # BM_d_cells.fcs & BM_e_cells.fcs in group 2 (once again please refer to the documentation for details)
 files.groups <- list(
-    group1 = c("Bone_marrow/ BM_a_cells.fcs", "Bone_marrow/ BM_b_cells.fcs")
-    group2 = c("Bone_marrow/ BM_c_cells.fcs", " BM_d_cells.fcs", " BM_e_cells.fcs"))
+    all.pooled = c("BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+                   "BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop15_singlets.fcs"
+                   "BM_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+                   "BM_cells_normalized_beadsremoved_Pop20_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+                   "LN_cells_normalized_beadsremoved_Pop20_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop02_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop03_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop04_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop05_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop06_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop07_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop08_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop09_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop10_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop11_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop12_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop13_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop14_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop15_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop16_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop17_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop18_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop19_singlets.fcs",
+                   "SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs",
 
 cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
     num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+      
 ```
-
-This can be done by tissue type (for example pooling lymph node and bone marrow files separately) or in whatever organization makes sense for your dataset.
 
 ## Output
 
