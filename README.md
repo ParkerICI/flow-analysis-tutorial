@@ -74,24 +74,53 @@ We will go through the following steps which, save for a few exceptions, would a
 # Panel editing
 Most analysis tools expect files that are part of the same analysis to have parameters and reagents named consistently. The [premessa](https://github.com/ParkerICI/premessa) includes a GUI tool that can be used to rename and synchronize panels across multiple FCS files.
 
+A few warnings. `premessa` is *opinionated* in the way it handles the information in the FCS panels, and is specifically tailored to handle the most common use case. The FCS file specification is problematic in a lot of ways and most instrument and analysis software packages do not use or interpret the information correctly anyways. There are 3 ways to refer to a channel in an FCS file, by number (e.g. the order in which they appear in the file), by name (e.g. *Dy161Di* ) and by description (e.g. *CD3*). `premessa` uses the name as unique channel identifier for two reasons:
+- it is guaranteed to be unique in a valid FCS file
+- it minimizes the risk of confusion when matching channels between multiple FCS files, as it corresponds to the intuitive notion of matching channels based on their identity instead of their ordering.
 
-****(create a case from existing files where we'd have to apply this step)*****
+The consequence of this choice is that **the ordering of the channels is not preserved during the processing**. Also at present `premessa` only preseves the `name` and `description` parameter keywords (i.e. $PnN and $PnS). All other parameter keywords (e.g. $PnG, $PnL, $PnO etc.) are discarded. Most of these keywords are used incorrectly anyways, but please feel free to open an issue if this is impacting your workflow.
 
-### Starting the panel editing GUI and selecting the working directory and example data
+### Usage
 
 You can start the panel editing GUI by typing the following command in your R session:
 ```R
 premessa::paneleditor_GUI()
 ```
-This will open a new web browser window, which is used for displaying the GUI, and a file selection dialog to select the working directory (see [Usage notes](#usage-notes))
+This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory containing the data you want to analyze, and select any file in that directory. The directory itself will then become the working directory for the software.
+To stop the software simply hit the "ESC" key in your R session. _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
 
+Once you have selected the working directory, the software will extract the panel information from all the FCS files contained in the directory. This information is then displayed in a table, where each row corresponds to a different parameter name ($PnN keyword), indicated by the row names (leftmost column), and each column corresponds to a different file, indicated in the column header. Each cell represents the description string ($PnS keyword) of a specific parameter in a given file. If a parameter is missing from a file, the word *absent* is displayed in the corresponding cell, which will be colored orange (note that this means that *absent* cannot be a valid parameter name). 
 
-![panel editor](screenshots/panel_editor.png)
+Whatever is written in the table when the *Process files* button is pressed, represents what the parameters will be renamed to. In other words the table represents the current state of the files, and you have to edit the individual cells as necessary to reflect the desired final state of the files. You can use the same shortcuts you use in Excel to facilitate the editing process (e.g. shift-click to select multiple rows or columns, ctrl-C and ctrl-V for copy and paste respectively, etc.). However be careful that pressing ctrl-Z (the conventional undo shortcut) will undo *all* you changes
 
-To stop the software simply hit the "ESC" key in your R session.
-_Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
+The table begins with three special columns:
+- *Remove*: if the box is checked the corresponding parameter is removed from all the files, and the row is grayed out
+- *Parameter*: this column represent the parameter name ($PnN keyword). Initially it will be identical to the first column of row names, but this column is editable. You can edit this column if you want to change the parameter names in the output files.
+- *Most common*: this column indicates what is the most common description value for that parameter, across all the files under analysis (i.e. the most common string across the row). Cells whose value differs from the value indicated in this column are displayed with a light pink background.
 
+The table columns are sorted by the number of *problematic* columns, i.e. by the number of pink and orange cells in the column. The first three columns of the table are fixed and always visible when you scroll the table horizontally. Please note that the browser included with the current vesion of RStudio seems to have a problem where the column headers do not scroll correctly. If that is the case, open the application in a regular web browser, by click on the "open browser" button in the top right corner of the RStudio browser.
 
+Two controls are located at the top of the table
+- *Output folder name*: a text box where you can input the name of the output folder. If this folder does not exist, it will be created as a sub-folder of the current working directory.
+- *Process files*: this button will start file processing. A file will be created in the output folder, with the same name as the original input file. **If a file of the same name exists already, it will be overwritten**. No change is made to the original files.
+
+### Panel editing with example data
+
+Start the GUI in your R window:
+```R
+premessa::paneleditor_GUI()
+```
+Then, select the "panel editing example" files as the directory. This will prompt a browser window that looks like this:
+![panel_edit_example](screenshots/panel_edit_example.png)
+
+As you can see here, there are several errors:
+  1. Marker description inconsistancies-both shaded in pink ("CD25" marker in the "BM_cells.fcs" colunm is labeled instead as "Cd25",    "CD4" marker in the "SPL_cells.fcs" file is labeled "CD4+")
+  2. Marker name inconsistances (marker "(Dy162)Di" is labeled "(Dy162)" and "(Gd155)Di" is "(Gd155)D" here)
+  
+Rename these to be consistent with the other files using controls described above, designate the name of your reconciled files (default is "renamed") then hit "Process files" and wait for your renamed files to be generated. When you're finished, you can re-open the files and check to make sure everything was properly edited:
+![panel_edit_example_renamed](screenshots/panel_edit_example_renamed.png)
+
+These edited, consistently named files can be carried into the downstream steps of the analysis.
 
 # Normalization
 The sensitivity of a CyTOF machine changes between different days (due to tuning) as well as during a single run due to variations in detector performance. To correct for this problem, [this](https://www.ncbi.nlm.nih.gov/pubmed/23512433) publication introduced the use of polystirene beads that can be used as a reference synthetic standard (the beads are commercially available from [Fluidigm](https://www.fluidigm.com/))
