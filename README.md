@@ -107,17 +107,19 @@ Two controls are located at the top of the table
 ### Panel editing with example data
 
 Start the GUI in your R window:
+
 ```R
 premessa::paneleditor_GUI()
 ```
+
 Then, select the "panel editing example" files as the directory. This will prompt a browser window that looks like this:
 ![panel_edit_example](screenshots/panel_edit_example.png)
 
 As you can see here, there are several errors:
-  1. Marker description inconsistancies-both shaded in pink ("CD25" marker in the "BM_cells.fcs" colunm is labeled instead as "Cd25",    "CD4" marker in the "SPL_cells.fcs" file is labeled "CD4+")
-  2. Marker name inconsistances (marker "(Dy162)Di" is labeled "(Dy162)" and "(Gd155)Di" is "(Gd155)D" here)
+  1. Marker description inconsistencies-both shaded in pink ("CD25" marker in the "BM_cells.fcs" colunm is labeled instead as "Cd25",    "CD4" marker in the "SPL_cells.fcs" file is labeled "CD4+")
+  2. Marker name inconsistencies (marker "(Dy162)Di" is labeled "(Dy162)" and "(Gd155)Di" is "(Gd155)D" here)
   
-Rename these to be consistent with the other files using controls described above, designate the name of your reconciled files (default is "renamed") then hit "Process files" and wait for your renamed files to be generated. When you're finished, you can re-open the files and check to make sure everything was properly edited:
+Rename these to by using basic editing controls described above, designate the name of your reconciled files (default is "renamed") then hit "Process files" and wait for your renamed files to be generated. When you're finished, you can re-open the files and check to make sure everything was properly edited:
 ![panel_edit_example_renamed](screenshots/panel_edit_example_renamed.png)
 
 These edited, consistently named files can be carried into the downstream steps of the analysis.
