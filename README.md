@@ -314,7 +314,7 @@ Another important point is if and how data is pooled before clustering. This cho
 2. Pooling data for each tissue type
 3. Pooling all the data together
 
-Our example input directory called `singlets` contains 80 files with the following naming scheme:
+Our example subdirectory directory called `singlets` contains 80 files with the following naming scheme:
 ```
 - BM_cells_normalized_beadsremoved_Pop01_singlets.fcs
 - LN_cells_normalized_beadsremoved_Pop01_singlets.fcs
