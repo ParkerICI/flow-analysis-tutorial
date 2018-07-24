@@ -164,7 +164,7 @@ The GUI contains two tabs:
 
 **1. Normalize data:** used for beads gating and normalization 
 
-![normalizerGUI_ScienceDataset](https://github.com/ParkerICI/flow-analysis-tutorial/blob/master/screenshots/normalizerGUI_ScienceDataset.png)
+![normalizerGUI_ScienceDataset](screenshots/normalizerGUI_ScienceDataset.png)
 
 
 This panel contains the following controls:
@@ -270,7 +270,7 @@ There are four types of visualization that allow you to inspect the results of t
 - *Separation*
   - *Top*: A histogram of the separation between the positive and negative barcode channels for all the events
   - *Bottom*: Barcode yields as a function of the separation threshold. As the threshold increases, the number of cells assigned to each sample decreases, and more events are left unassigned. The currently selected threshold is displayed as a vertical red line. **This is probably the most important plot**. The ideal separation threshold is usually found right before the end of the plateau in barcode yields, before the curve drops dramatically
-![Separation_plot_BM](https://github.com/ParkerICI/flow-analysis-tutorial/blob/master/screenshots/Separation_plot_BM.png)
+![Separation_plot_BM](screenshots/Separation_plot_BM.png)
 
 - *Event*
   - *Top*: Bargraph or cell yields for each sample after debarcoding, given the current settings
@@ -306,7 +306,7 @@ For the purpose of this analysis, we can imainge to use clustering two ways:
 1. Estimating the actual number of populations in the data, i.e. as much as possible get to the point where 1 cluster = 1 biological population.
 2. Using clustering exclusively as a mean to reduce the size of the data, tending to err on the side of over-clustering, i.e. setting the clustering parameters so that the algorithm will produce more clusters than there are populations in the data, with the understanding that further analysis/visualization will reveal relationships between the clusters, possibly highlighting cases where a single population has been erroneously broken up into multiple redundant clusters.
 
-In this tutorial we will apply the second approah using the [groppolo](https://github.com/ParkerICI/grappolo]) R package.
+In this tutorial we will apply the second approah using the [grappolo](https://github.com/ParkerICI/grappolo]) R package.
 
 Another important point is if and how data is pooled before clustering. This choice has very important consequences for what kind of downstream analysis we can do, particularly when we try to look at statistically significant differences across multiple samples. We will discuss these differences as they arise, for now we will cluster the data three different ways:
 
@@ -326,6 +326,9 @@ Our example input directory called `singlets` contains 80 files with the followi
 - SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs
 - BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs
 ```
+
+### Clustering each sample independently
+
 If the choice was to run each sample independently (option 1), the following R code would apply:
 
 ```R
@@ -336,207 +339,59 @@ If the choice was to run each sample independently (option 1), the following R c
 
 
 col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", 
-"CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", 
-"CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64",
-"CD138", "CD103", "IgM", "CD44", "MHCII")
+    "CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", 
+    "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64",
+    "CD138", "CD103", "IgM", "CD44", "MHCII")
 
 # Please refer to the documentation of this function for an explanation of the parameters
 # and for a description of the output type. The output is saved on disk, and the function
 # simply return the list of files that have been clustered
-cluster_fcs_files_in_dir("singlets", num.cores = 1, col.names = col.names, num.clusters = 200,
-    asinh.cofactor = 5, output.type = "directory")
+cluster_fcs_files_in_dir("./", num.cores = 8, col.names = col.names, num.clusters = 200,
+    asinh.cofactor = 5, output.dir = "single_samples")
 
-# You can also specify a list of files directly using the cluster_fcs_files function,
-# which takes essentially the same arguments
-files.list <- c("singlets/BM_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/LN_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs", "singlets/BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs")
-
-cluster_fcs_files(files.list, num.cores = 1, col.names = col.names, num.clusters = 200,
-    asinh.cofactor = 5, output.type = "directory")
 ```
+
+### Pooling samples by tissue type
 
 If instead you wanted to pool some files together by tissue type (options 2) you would setup the run as follows:
 
 ```R
-# Assuming for instance that you wanted to pool the .FCS into 4 groups Bone Marrow (BM.poled), Spleen (SPL.pooled), Lymph Node (LN.pooled), and Blood (BL.pooled) corresponding to tissue type (once again please refer to the documentation for details)
+
+# These instructions will create lists of the tissue specific files
+BM.files.list <- list.files(pattern = "BM.*.fcs$")
+SPL.files.list <- list.files(pattern = "SPL.*.fcs$")
+LN.files.list <- list.files(pattern = "LN.*.fcs$")
+BL.files.list <- list.files(pattern = "BL.*.fcs$")
 
 files.groups <- list(
-  BM.pooled= c("BM_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-        "BM_cells_normalized_beadsremoved_Pop20_singlets.fcs")
-  
-  SPL.pooled = c("SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop10_singlets.fcs",       
-         "SPL_cells_normalized_beadsremoved_Pop11_singlets.fcs"
-         "SPL_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-         "SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs")
-    
-    LN.pooled = c("LN_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-         "LN_cells_normalized_beadsremoved_Pop20_singlets.fcs",
-  
-    BLD.pooled = c("BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-         "BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs"))
+  BM.pooled = BM.files.list,
+  SPL.pooled = SPL.files.list,
+  LN.pooled = LN.files.list,
+  BLD.pooled = BL.files.list
+)
 
-cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
-                         num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+# The cluster_fcs_files_groups function enables pooling and clustering of the data. Here we are using the downsample.to option to reduce the size of the dataset
+# Before pooling, a random number of cell events (50000 in this case) is going to be selected from each file (once again please refer to the documentation for details)
+
+cluster_fcs_files_groups(files.groups, num.cores = 8, col.names = col.names, 
+                         num.clusters = 200, asinh.cofactor = 5, downsample.to = 50000, output.dir = "pooled_by_tissue")
 ```
+
+### Pooling all samples together
 
 If instead you wanted to pool together all files together (option 3),  you would setup the run as follows:
 
 ```R
-# Assuming for instance that you wanted to pool BM_a_cells.fcs and BM_b_cells.fcs in group 1, and BM_c_cells.fcs, 
-# BM_d_cells.fcs & BM_e_cells.fcs in group 2 (once again please refer to the documentation for details)
-files.groups <- list(
-    all.pooled = c("BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-                   "BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop15_singlets.fcs"
-                   "BM_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-                   "BM_cells_normalized_beadsremoved_Pop20_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-                   "LN_cells_normalized_beadsremoved_Pop20_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop02_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop03_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop04_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop05_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop06_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop07_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop08_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop09_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop10_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop11_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop12_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop13_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop14_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop15_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop16_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop17_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop18_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop19_singlets.fcs",
-                   "SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs",
 
-cluster_fcs_files_groups(files.groups, num.cores = 1, col.names = col.names, 
-    num.clusters = 200, asinh.cofactor = 5, output.type = "directory")
+files.list <- list.files(pattern = "*.fcs$")
+
+files.groups <- list(
+    all.pooled = files.list
+)
+
+# Before pooling, we downsample each file to 10000 cell events to reduce the size of the dataset
+cluster_fcs_files_groups(files.groups, num.cores = 8, col.names = col.names, 
+    num.clusters = 200, asinh.cofactor = 5, downsample.to = 10000, output.dir = "all_pooled")
       
 ```
 
@@ -567,19 +422,22 @@ Besides the idea of representing data as a graph, these two approaches are also 
 
 In this mode of analysis the graph is generated by exclusively using the clusters in your dataset. Similar to other methods (e.g. tSNE), each time the layout algorithm is ran, it generates a different result. This means that, if you want to visualize the similarity and differences between mulitple samples, you need to construct a single graph that contains data from all the samples. If you did not do that, you would not be able to compare between separate graphs, as the layout does not have any *orientation* and changes every time the method is run (i.e. what is top left in one graph, has no relationship with what is top left in another one).
 
-The input to this step of the analysis are the `.clustered.txt` files generated using `grappolo`
+For the purpose of tutorial we will create a single unsupervised graphs including all the samples, clustered independently (i.e. each node in the final graph will represent a cluster from a single sample). The input to this step of the analysis are the `.clustered.txt` files generated using `grappolo` as described in the [Clustering each sample indepedently](#clustering-each-sample-independently) section.
 
-**[MODIFY THIS CODE TO BE SPECIFIC TO OUR DATASET]**
 
 ```R
-input.files <- c("A.clustered.txt", "B.clustered.txt")
+# List the clustered.txt files contained in the "single_samples" directory
+input.files <- list.files(path = "single_samples", pattern = "*.clustered.txt$", full.names = TRUE)
 
-# Optional: Define a table of sample-level metadata. All the nodes derived from the corresponding cluster file will
-# have vertex properties corresponding to this metadata ("response" and "pfs" in this example)
-metadata.tab <- data.frame(filename = input.files, response = c("R", "NR"), pfs = c(12, 7))
+# Optional: load a table of sample-level metadata. All the nodes derived from the corresponding cluster file will
+# have vertex properties corresponding to this metadata
+metadata.tab <- read.table("metadata_tab.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 # Define which columns contain variables that are going to be used to calculate similarities between the nodes
-col.names <- c("foo", "bar", "foobar")
+col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", 
+    "CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", 
+    "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64",
+    "CD138", "CD103", "IgM", "CD44", "MHCII")
 
 
 # The clusters in each one of the input files will be pooled together in a single graph
@@ -589,7 +447,7 @@ G <- vite::get_unsupervised_graph_from_files(input.files, metadata.tab = metadat
             metadata.filename.col = "filename", col.names = col.names, filtering.threshold = 15)
 
 # Write the resulting graph in graphml format
-igraph::write.graph(G, "unsupervised.graphml", format = "grpahml")
+vite::write_graph(G, "all_samples_unsupervised.graphml")
 ```
 
 The `vite::get_unsupervised_graph_from_file` will return a graph object that you can save as a `graphml` file using `igraph::write.graph`. It will also create a folder called `clusters_data` in your current directory. This folder is used for visualization with `panorama` (see below) and contains a directory for each one of the original cluster files, with all the clusters split into individual `rds` files
@@ -609,26 +467,28 @@ Also with this approach multiple samples can be processed independently because 
 
 
 
-This code snippet demonstrates how to construct scaffold maps. In this example, the data for the landmark nodes, i.e. the gated populations, are given to you in the subfolder called [gated](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as single FCS files (one for each population). The software will split the name of the FCS files using `"_"` as separator and the last field will be used as the population name. For instance if a file is called `foo_bar_foobar_Bcells.fcs` the corresponding population will be called `Bcells` in the scaffold analysis. Enter the following code into R:
+This code snippet demonstrates how to construct scaffold maps. In this example, the data for the landmark nodes, i.e. the gated populations, are given to you in the subfolder called [gated](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as single FCS files (one for each population). The software will split the name of the FCS files using `"_"` as separator and the last field will be used as the population name. For instance if a file is called `foo_bar_foobar_Bcells.fcs` the corresponding population will be called `Bcells` in the scaffold analysis.
 
-**[MAKE THE CODE SPECIFIC TO OUR DATASET]**
+For the purpose of this tutorial, we will use the data clustered by pooling all the samples from the same tissue together. Therefore we will obtain a Scaffold map for each tissue. When we visualize the data with `panorama` (see below) we will also be able to visualize each sample independently
+
 
 ```R
-input.files <- c("A.clustered.txt", "B.clustered.txt")
+input.files <- list.files(path = "pooled_by_tissue", pattern = "*.clustered.txt$", full.names = TRUE)
 
 # Define which columns contain variables that are going to be used to calculate similarities between the nodes
-col.names <- c("foo", "bar", "foobar")
+col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", 
+    "CD19", "120g8", "CD8", "Ly6C", "CD4", "CD11b", "CD27", "CD16_32", "SiglecF", "Foxp3", "B220", 
+    "CD5", "FceR1a", "TCRgd", "CCR7", "Sca1", "CD49b", "cKit", "CD150", "CD25", "TCRb", "CD43", "CD64",
+    "CD138", "CD103", "IgM", "CD44", "MHCII")
 
 # Load the data for the landmarks
 landmarks.data <- vite::load_landmarks_from_dir("gated/", asinh.cofactor = 5, transform.data = T)
     
-# Run the analysis. By default results will be save in a directory called "scaffold_result"
-vite::run_scaffold_analysis(input.files, input.files[1], landmarks.data, col.names)
+# Run the analysis. By default results will be saved in a directory called "scaffold_result"
+vite::run_scaffold_analysis(input.files, ref.file = "pooled_by_tissue/BM.pooled.clustered.txt", landmarks.data, col.names)
 ```
 
-
-
-The `vite::run_scaffold_analysis` will create an ouptut directory (by default called `scaffold_result`) with a separate `graphml` file for each one of the `clustered.txt` file provided as input, containing the Scaffold map for that sample. The directory will also contain two sub-folders called `clusters_data` and `landmarks_data`. Similarly to what happened for the unsupervised visualization above, these folders contain downsampled single-cell data for the clusters and landmarks, to be used for visualization. The `clusters_data` folder will contain a separate sub-folder for each `graphml` file, containing the data specific to that sample. The data is split in multiple `rds` files, one for each cluster (or landmark in `landmarks_data`). If the Scaffold analysis was constructed from data that was pooled before clustering (i.e. using `grappolo::cluster_fcs_files_groups`), the `clusters_data` folder will also contain a subfolder called `pooled`, containing the pooled data, in addition to the sample-specific folders described above.
+The `vite::run_scaffold_analysis` function will create an ouptut directory (by default called `scaffold_result`) with a separate `graphml` file for each one of the `clustered.txt` file provided as input, containing the Scaffold map for that sample. The directory will also contain two sub-folders called `clusters_data` and `landmarks_data`. Similarly to what happened for the unsupervised visualization above, these folders contain downsampled single-cell data for the clusters and landmarks, to be used for visualization. The `clusters_data` folder will contain a separate sub-folder for each invidual sample represented in the analysis, containing the data specific to that sample. The data is split in multiple `rds` files, one for each cluster (or landmark in `landmarks_data`). If the Scaffold analysis was constructed from data that was pooled before clustering (i.e. using `grappolo::cluster_fcs_files_groups`), the `clusters_data` folder will also contain a subfolder called `pooled`, containing the pooled data for each `clustered.txt` file, in addition to the sample-specific folders described above.
 
 ### Using the GUI
 
