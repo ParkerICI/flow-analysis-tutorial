@@ -94,6 +94,9 @@ _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-e
 
 
 # Normalization
+
+*Warning: the sample dataset is pretty massive. If you are having trouble normalizing data on your machine, the normalization results for this tutorial are located in the XXX folder*
+
 The sensitivity of a CyTOF machine changes between different days (due to tuning) as well as during a single run due to variations in detector performance. To correct for this problem, [this](https://www.ncbi.nlm.nih.gov/pubmed/23512433) publication introduced the use of polystirene beads that can be used as a reference synthetic standard (the beads are commercially available from [Fluidigm](https://www.fluidigm.com/))
 
 The normalization algorithm works by identifying a reference intensity for the beads channel and then applying a correction factor to the data so that the intensity at every specific time matches the reference intensity
@@ -204,6 +207,8 @@ The plots in the bottom half of the panel help you select an appropriate cutoff.
 ![beads removal](screenshots/beads_removal.PNG)
 
 # De-barcoding
+
+*Warning: the sample dataset is pretty massive. If you are having trouble debarcoding data on your machine, the debarcoding results for this tutorial are located in the XXX folder*
 
 Barcoding (described in [this](https://www.ncbi.nlm.nih.gov/pubmed/25612231) publication) is a way to minimize staining variability across multiple samples. Each sample is labeled with a unique combination of metals before staining. All the samples are then pooled in a single tube, and stained in a single reaction, which guarantees that they are all exposed to the same amount of antibody.
 
@@ -455,7 +460,7 @@ The `vite::get_unsupervised_graph_from_file` will return a graph object that you
 
 ## Scaffold maps
 
-Scaffold maps were introduced in [this](https://www.ncbi.nlm.nih.gov/pubmed/26160952) publication. They are still based on the idea of represnting data as a graph, laid out with a force-directed layout. However this time the graph includes two types of nodes:
+Scaffold maps were introduced in [this](https://www.ncbi.nlm.nih.gov/pubmed/26160952) publication. They are still based on the idea of representing data as a graph, laid out with a force-directed layout. However this time the graph includes two types of nodes:
 
 1. Clusters nodes, the same as what we saw before
 2. Landmark nodes, this are derived from gated data, and represent known canonical populations (e.g. T cells, B cells etc.)
