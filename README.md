@@ -78,7 +78,7 @@ A few warnings. `premessa` is *opinionated* in the way it handles the informatio
 - it is guaranteed to be unique in a valid FCS file
 - it minimizes the risk of confusion when matching channels between multiple FCS files, as it corresponds to the intuitive notion of matching channels based on their identity instead of their ordering.
 
-The consequence of this choice is that **the ordering of the channels is not preserved during the processing**. Also at present `premessa` only preseves the `name` and `description` parameter keywords (i.e. $PnN and $PnS). All other parameter keywords (e.g. $PnG, $PnL, $PnO etc.) are discarded. Most of these keywords are used incorrectly anyways, but please feel free to open an issue if this is impacting your workflow.
+The consequence of this choice is that **the ordering of the channels is not preserved during the processing**. Also at present `premessa` only preseves the `name` and `description` parameter keywords (i.e. $PnN and $PnS). All other parameter keywords (e.g. $PnG, $PnL, $PnO etc.) are discarded.
 
 ### Usage
 
@@ -86,9 +86,6 @@ You can start the panel editing GUI by typing the following command in your R se
 ```R
 premessa::paneleditor_GUI()
 ```
-This will open a new web browser window, which is used for displaying the GUI. Upon starting, a file selection window will also appear from your R session. You should use this window to navigate to the directory containing the data you want to analyze, and select any file in that directory. The directory itself will then become the working directory for the software.
-To stop the software simply hit the "ESC" key in your R session. _Note_: If the GUI does _not_ open a new web browser, hit the "ESC" key and re-enter the above command.
-
 Once you have selected the working directory, the software will extract the panel information from all the FCS files contained in the directory. This information is then displayed in a table, where each row corresponds to a different parameter name ($PnN keyword), indicated by the row names (leftmost column), and each column corresponds to a different file, indicated in the column header. Each cell represents the description string ($PnS keyword) of a specific parameter in a given file. If a parameter is missing from a file, the word *absent* is displayed in the corresponding cell, which will be colored orange (note that this means that *absent* cannot be a valid parameter name). 
 
 Whatever is written in the table when the *Process files* button is pressed, represents what the parameters will be renamed to. In other words the table represents the current state of the files, and you have to edit the individual cells as necessary to reflect the desired final state of the files. You can use the same shortcuts you use in Excel to facilitate the editing process (e.g. shift-click to select multiple rows or columns, ctrl-C and ctrl-V for copy and paste respectively, etc.). However be careful that pressing ctrl-Z (the conventional undo shortcut) will undo *all* you changes
@@ -251,29 +248,29 @@ Assuming the FCS file *BM_cells.fcs* is located in the directory *Science Data*,
 
 ```
 Science Data
-|--- BM_cells.fcs
+|--- BM_cells_normalized_beadsremoved.fcs
 |--- debarcoded
-     |--- BM_cells.Pop01.fcs
-     |--- BM_cells.Pop02.fcs
-     |--- BM_cells.Pop03.fcs
-     |--- BM_cells.Pop04.fcs
-     |--- BM_cells.Pop05.fcs
-     |--- BM_cells.Pop06.fcs
-     |--- BM_cells.Pop07.fcs
-     |--- BM_cells.Pop08.fcs
-     |--- BM_cells.Pop09.fcs
-     |--- BM_cells.Pop10.fcs
-     |--- BM_cells.Pop11.fcs
-     |--- BM_cells.Pop12.fcs
-     |--- BM_cells.Pop13.fcs
-     |--- BM_cells.Pop14.fcs
-     |--- BM_cells.Pop15.fcs
-     |--- BM_cells.Pop16.fcs
-     |--- BM_cells.Pop17.fcs
-     |--- BM_cells.Pop18.fcs
-     |--- BM_cells.Pop19.fcs
-     |--- BM_cells.Pop20.fcs
-     |--- BM_cells_Unassigned.fcs
+     |--- BM_cells_normalized_beadsremoved_129-01.fcs
+     |--- BM_cells_normalized_beadsremoved_129-02.fcs
+     |--- BM_cells_normalized_beadsremoved_129-03.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-01.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-02.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-03.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-04.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-05.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-06.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-07.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-08.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-09.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-10.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-11.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-12.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-13.fcs
+     |--- BM_cells_normalized_beadsremoved_B6-14.fcs
+     |--- BM_cells_normalized_beadsremoved_Balb-01.fcs
+     |--- BM_cells_normalized_beadsremoved_Balb-02.fcs
+     |--- BM_cells_normalized_beadsremoved_Balb-03.fcs
+     |--- BM_cells_normalized_beadsremoved_Unassigned.fcs
 ```
 
 ## Using the de-barcoding GUI 
@@ -324,7 +321,7 @@ Whatever analysis you are thinking of doing, some amount of gating is usually re
 
 Depending on the panel you are using, you may also need to remove certain populations that you do not want to include in the analysis. For instance if you are using a T-cell specific panel, you will probably want to exclude any non T-cell from the analysis, since the panel does not include any useful measurement on those
 
-The process of gating will not be covered in this tutorial, as there are multiple commercial packages available for this
+The process of gating will not be covered in this tutorial, as there are multiple commercial packages available for this. The data in the subfolder `gated` is what we are going to use as input for the rest of the analysis. Each file has been gated to only include live leukocyte singlets.
 
 # Clustering
 
@@ -350,17 +347,13 @@ Another important point is if and how data is pooled before clustering. This cho
 2. Pooling data for each tissue type
 3. Pooling all the data together
 
-Our example subdirectory directory called `singlets` contains 80 files with the following naming scheme:
+Our example subdirectory directory called `gated` contains 80 files with the following naming scheme:
 ```
-- BM_cells_normalized_beadsremoved_Pop01_singlets.fcs
-- LN_cells_normalized_beadsremoved_Pop01_singlets.fcs
-- SPL_cells_normalized_beadsremoved_Pop01_singlets.fcs
-- BLD_cells_normalized_beadsremoved_Pop01_singlets.fcs
+BLD_cells_normalized_beadsremoved_129-01_leukocytes.fcs
+BM_cells_normalized_beadsremoved_B6-10_leukocytes.fcs    
+LN_cells_normalized_beadsremoved_B6-06_leukocytes.fcs    
+SPL_cells_normalized_beadsremoved_B6-02_leukocytes.fcs
 ...
-- BM_cells_normalized_beadsremoved_Pop20_singlets.fcs
-- LN_cells_normalized_beadsremoved_Pop20_singlets.fcs
-- SPL_cells_normalized_beadsremoved_Pop20_singlets.fcs
-- BLD_cells_normalized_beadsremoved_Pop20_singlets.fcs
 ```
 
 ### Clustering each sample independently
@@ -382,22 +375,22 @@ col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23",
 # Please refer to the documentation of this function for an explanation of the parameters
 # and for a description of the output type. The output is saved on disk, and the function
 # simply return the list of files that have been clustered
-cluster_fcs_files_in_dir("./", num.cores = 8, col.names = col.names, num.clusters = 200,
-    asinh.cofactor = 5, output.dir = "single_samples")
+grappolo::cluster_fcs_files_in_dir("gated", num.cores = 8, col.names = col.names, num.clusters = 200,
+    asinh.cofactor = 5, output.dir = "clustered_single_samples")
 
 ```
 
 ### Pooling samples by tissue type
 
-If instead you wanted to pool some files together by tissue type (options 2) you would setup the run as follows:
+If instead you wanted to pool some files together by tissue type (option 2) you would setup the run as follows:
 
 ```R
 
 # These instructions will create lists of the tissue specific files
-BM.files.list <- list.files(pattern = "BM.*.fcs$")
-SPL.files.list <- list.files(pattern = "SPL.*.fcs$")
-LN.files.list <- list.files(pattern = "LN.*.fcs$")
-BL.files.list <- list.files(pattern = "BL.*.fcs$")
+BM.files.list <- list.files(pattern = "BM.*.fcs$", path = "gated", full.names = TRUE)
+SPL.files.list <- list.files(pattern = "SPL.*.fcs$", path = "gated", full.names = TRUE)
+LN.files.list <- list.files(pattern = "LN.*.fcs$", path = "gated", full.names = TRUE)
+BL.files.list <- list.files(pattern = "BL.*.fcs$", path = "gated", full.names = TRUE)
 
 files.groups <- list(
   BM.pooled = BM.files.list,
@@ -410,7 +403,7 @@ files.groups <- list(
 # Before pooling, a random number of cell events (50000 in this case) is going to be selected from each file (once again please refer to the documentation for details)
 
 cluster_fcs_files_groups(files.groups, num.cores = 8, col.names = col.names, 
-                         num.clusters = 200, asinh.cofactor = 5, downsample.to = 50000, output.dir = "pooled_by_tissue")
+                         num.clusters = 200, asinh.cofactor = 5, downsample.to = 50000, output.dir = "clustered_by_tissue")
 ```
 
 ### Pooling all samples together
@@ -419,7 +412,7 @@ If instead you wanted to pool together all files together (option 3),  you would
 
 ```R
 
-files.list <- list.files(pattern = "*.fcs$")
+files.list <- list.files(pattern = "*.fcs$", path = "gated", full.names = TRUE)
 
 files.groups <- list(
     all.pooled = files.list
@@ -440,6 +433,16 @@ Both clustering functions ouptut two types of data:
 The summary table contains one row for each cluster, and one column for each channel in the original FCS files, with the table entries representing the median intensity of the channel in the corresponding cluster.
 
 If multiple files have been pooled together this table also contains columns in the form `CD4@BM_a_cells.fcs`, which contain the median expression of `CD4`, calculated only on the cells in that cluster that came from sample `BM_a_cells.fcs`
+
+## Using the GUI
+
+A GUI is available to launch either an unsupervised graph analysis or a Scaffold analysis. The GUI allows you to specify all the input options in a graphical environment, instead of having to write R code.
+
+To launch the GUI type the following in your R console
+
+```R
+grappolo::clustering_GUI()
+```
 
 
 # Visualization - running the analysis
@@ -463,7 +466,7 @@ For the purpose of tutorial we will create a single unsupervised graphs includin
 
 ```R
 # List the clustered.txt files contained in the "single_samples" directory
-input.files <- list.files(path = "single_samples", pattern = "*.clustered.txt$", full.names = TRUE)
+input.files <- list.files(path = "clustered_single_samples", pattern = "*.clustered.txt$", full.names = TRUE)
 
 # Optional: load a table of sample-level metadata. All the nodes derived from the corresponding cluster file will
 # have vertex properties corresponding to this metadata
@@ -509,7 +512,7 @@ For the purpose of this tutorial, we will use the data clustered by pooling all 
 
 
 ```R
-input.files <- list.files(path = "pooled_by_tissue", pattern = "*.clustered.txt$", full.names = TRUE)
+input.files <- list.files(path = "clustered_by_tissue", pattern = "*.clustered.txt$", full.names = TRUE)
 
 # Define which columns contain variables that are going to be used to calculate similarities between the nodes
 col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", 
@@ -521,7 +524,7 @@ col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23",
 landmarks.data <- vite::load_landmarks_from_dir("gated/", asinh.cofactor = 5, transform.data = T)
     
 # Run the analysis. By default results will be saved in a directory called "scaffold_result"
-vite::run_scaffold_analysis(input.files, ref.file = "pooled_by_tissue/BM.pooled.clustered.txt", landmarks.data, col.names)
+vite::run_scaffold_analysis(input.files, ref.file = "clustered_by_tissue/BM.pooled.clustered.txt", landmarks.data, col.names)
 ```
 
 The `vite::run_scaffold_analysis` function will create an ouptut directory (by default called `scaffold_result`) with a separate `graphml` file for each one of the `clustered.txt` file provided as input, containing the Scaffold map for that sample. The directory will also contain two sub-folders called `clusters_data` and `landmarks_data`. Similarly to what happened for the unsupervised visualization above, these folders contain downsampled single-cell data for the clusters and landmarks, to be used for visualization. The `clusters_data` folder will contain a separate sub-folder for each invidual sample represented in the analysis, containing the data specific to that sample. The data is split in multiple `rds` files, one for each cluster (or landmark in `landmarks_data`). If the Scaffold analysis was constructed from data that was pooled before clustering (i.e. using `grappolo::cluster_fcs_files_groups`), the `clusters_data` folder will also contain a subfolder called `pooled`, containing the pooled data for each `clustered.txt` file, in addition to the sample-specific folders described above.
@@ -553,7 +556,7 @@ Once the working directory has been selected two browser windows will be opened:
 - If your browser is configured to block pop-ups you need to allow pop-ups coming from the address `127.0.0.1:8072` (8072 is the default `panorama` port, you will have to enable pop-ups coming from a different port if you change this default)
 - If your browser is configured to open new windows in a new tab, the last tab shown in the browser will be the plotting window, which is initially empty. The main `panorama` interface will be in a different tab
 
-The functionality of the GUI is described in detail in the README of the panorama package.
+The functionality of the GUI is described in detail in the [README](https://github.com/ParkerICI/panorama/blob/master/README.md) of the panorama package.
 
 **[INCLUDE HERE SOME EXAMPLES OF INFORMATIVE VISUALIZATIONS FOR THIS DATA, E.G. DIFFERENCES BETWEEN DIFFERENT TISSUES]**
 
