@@ -50,19 +50,19 @@ normalizer_GUI()
 ```
 In this tutorial we will use both formats, depending on how many functions we are calling from the same package (the second format saves a lot of typing if you are using multiple functions from the same pacakage in your analysis)
 
-# Description of the dataset used in this tutorial
+# Overview of the tutorial and sample data
 
-**[ADD A DECSRIPTION OF THE DATASET, HOW MANY FILES, HOW THEY ARE ORGANIZED, WHAT SAMPLES THEY REPRESENT]**
+In this tutorial we will provide step-by-step instructions to analyze and visualize high-dimensional single cell cytometry data. While these methods are applicable to both flow and mass-cytometry data, this tutorial uses a mass-cytometry from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pubmed/26160952) in _Science_.
 
-# Overview
+The data (a subset of the data presented in the paper) is available [here](https://pici.app.box.com/folder/52255586839). This dataset includes immune cells from 4 different tissues (bone marrow, blood, spleen, lymph nodes) and 3 different genetic strains of mice (C57BL/6, Balb/c, and 129S1/S). 
 
-In this tutorial, we will go step-by-step covering methods to analyze and visualize high-dimensional single cell data. Wihle these methods are applicable to both flow and mass-cytometry data, this tutorial uses a mass-cytometry [dataset](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) (from a 2015 [publication](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4537647/) in _Science_).
+The dataset is quite massive, and some steps may require a large computer to perform. If you are having troubles, the dataset folder contains processed data for all the computationally intensive steps.
 
-We will go through the following steps which, save for a few exceptions, would also apply to a flow-cytometry dataset:
+During this tutorial, we will go through the following steps which, save for a few exceptions, would also apply to a flow-cytometry dataset:
 
 * [Panel editing](#panel-editing) 
-* [Normalization](#normalization) (Mass Cytometry)
-* [De-barcoding](#de-barcoding) (Mass Cytometry)
+* [Normalization](#normalization) (Mass Cytometry only)
+* [De-barcoding](#de-barcoding) (Mass Cytometry only)
 * [Gating](#gating)
 * [Visualization - running the analysis](#visualization---running-the-analysis)
   * [Unsupervised visualization](#unsupervised-visualization)
@@ -74,13 +74,9 @@ We will go through the following steps which, save for a few exceptions, would a
 # Panel editing
 Most analysis tools expect files that are part of the same analysis to have parameters and reagents named consistently. The [premessa](https://github.com/ParkerICI/premessa) includes a GUI tool that can be used to rename and synchronize panels across multiple FCS files.
 
-A few warnings. `premessa` is *opinionated* in the way it handles the information in the FCS panels, and is specifically tailored to handle the most common use case. The FCS file specification is problematic in a lot of ways and most instrument and analysis software packages do not use or interpret the information correctly anyways. There are 3 ways to refer to a channel in an FCS file, by number (e.g. the order in which they appear in the file), by name (e.g. *Dy161Di* ) and by description (e.g. *CD3*). `premessa` uses the name as unique channel identifier for two reasons:
-- it is guaranteed to be unique in a valid FCS file
-- it minimizes the risk of confusion when matching channels between multiple FCS files, as it corresponds to the intuitive notion of matching channels based on their identity instead of their ordering.
+Please refer to the original documentation for details about how the panel editing works and some of the subtleties of handling different FCS parameters
 
-The consequence of this choice is that **the ordering of the channels is not preserved during the processing**. Also at present `premessa` only preseves the `name` and `description` parameter keywords (i.e. $PnN and $PnS). All other parameter keywords (e.g. $PnG, $PnL, $PnO etc.) are discarded.
-
-### Usage
+## Usage
 
 You can start the panel editing GUI by typing the following command in your R session:
 ```R
@@ -95,13 +91,11 @@ The table begins with three special columns:
 - *Parameter*: this column represent the parameter name ($PnN keyword). Initially it will be identical to the first column of row names, but this column is editable. You can edit this column if you want to change the parameter names in the output files.
 - *Most common*: this column indicates what is the most common description value for that parameter, across all the files under analysis (i.e. the most common string across the row). Cells whose value differs from the value indicated in this column are displayed with a light pink background.
 
-The table columns are sorted by the number of *problematic* columns, i.e. by the number of pink and orange cells in the column. The first three columns of the table are fixed and always visible when you scroll the table horizontally. Please note that the browser included with the current vesion of RStudio seems to have a problem where the column headers do not scroll correctly. If that is the case, open the application in a regular web browser, by click on the "open browser" button in the top right corner of the RStudio browser.
-
 Two controls are located at the top of the table
 - *Output folder name*: a text box where you can input the name of the output folder. If this folder does not exist, it will be created as a sub-folder of the current working directory.
 - *Process files*: this button will start file processing. A file will be created in the output folder, with the same name as the original input file. **If a file of the same name exists already, it will be overwritten**. No change is made to the original files.
 
-### Panel editing with example data
+## Panel editing with example data
 
 Start the GUI in your R window:
 
@@ -109,21 +103,21 @@ Start the GUI in your R window:
 premessa::paneleditor_GUI()
 ```
 
-Then, select the "panel editing example" files as the directory. This will prompt a browser window that looks like this:
+Then, select the `original_files` directory in the sample dataset . This will prompt a browser window that looks like this:
+
 ![panel_edit_example](screenshots/panel_edit_example.png)
 
-As you can see here, there are several errors:
-  1. Marker description inconsistencies-both shaded in pink ("CD25" marker in the "BM_cells.fcs" colunm is labeled instead as "Cd25",    "CD4" marker in the "SPL_cells.fcs" file is labeled "CD4+")
-  2. Marker name inconsistencies (marker "(Dy162)Di" is labeled "(Dy162)" and "(Gd155)Di" is "(Gd155)D" here)
+As you can see here, there are two discrepnacies:
+1. The file `BLD_cells.fcs` is missing the `FileNum` parameter. Click on the checkbox in the `Remove` column to remove this parameter from all the files
+2. The parameter `(Yb176Di)` has `MHC-II` as the description in the `BM_cells.fcs` file, while it is named `MHCII` in all the other files. Correct this by editing the corresponding cell in the table
   
-Rename these to by using basic editing controls described above, designate the name of your reconciled files (default is "renamed") then hit "Process files" and wait for your renamed files to be generated. When you're finished, you can re-open the files and check to make sure everything was properly edited:
-![panel_edit_example_renamed](screenshots/panel_edit_example_renamed.png)
+Once you make these edits click the `Process files` button, and the renamed files will be created in a subfolder called `renamed` of the current working directory. For convenience the renamed files are also included in the sample dataset distribution, in the `renamed` folder
 
-These edited, consistently named files can be carried into the downstream steps of the analysis.
+You can close the GUI and reopen it again in the `renamed` folder to verify that all the files now have consistent panel names. These corrected files are what we are going to use for the remainder of the analysis
 
 # Normalization
 
-*Warning: the sample dataset is pretty massive. If you are having trouble normalizing data on your machine, the normalization results for this tutorial are located in the XXX folder*
+*Warning: the sample dataset is pretty massive. If you are having trouble normalizing data on your machine, the normalization results for this tutorial are located in the `normed` folder*
 
 The sensitivity of a CyTOF machine changes between different days (due to tuning) as well as during a single run due to variations in detector performance. To correct for this problem, [this](https://www.ncbi.nlm.nih.gov/pubmed/23512433) publication introduced the use of polystirene beads that can be used as a reference synthetic standard (the beads are commercially available from [Fluidigm](https://www.fluidigm.com/))
 
@@ -138,19 +132,19 @@ For the purpose of this tutorial we will use the first method. The workflow invo
 2. Data normalization
 3. Bead removal (optional)
 
-Assuming you're using the example [Science data](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as your working directory and it contains four FCS files called BM_cells.FCS, SPL_cells.FCS, LN_cells.FCS and BLD_cells.FCD, at the end of the workflow the following directory structure and output files will be generated:
+Assuming you're using the `renamed` folder as your working directory, at the end of the workflow the following directory structure and output files will be generated:
 
 ```
-Science data
-|--- BM_cells.FCS 
-|--- SPL_cells.FCS 
-|--- LN_cells.FCS 
-|--- BLD_cells.FCS
+renamed
+|--- BM_cells.fcs 
+|--- SPL_cells.fcs 
+|--- LN_cells.fcs
+|--- BLD_cells.fcs
 |--- normed
      |--- BM_cells_normalized.fcs
      |--- SPL_cells_normalized.fcs
-     |--- LN_cells_normalized.FCS 
-     |--- BLD_cells_normalized.FCS
+     |--- LN_cells_normalized.fcs
+     |--- BLD_cells_normalized.fcs
      |--- beads_before_and_after.pdf
      |--- beads_vs_time
           |--- BM_cells.pdf
@@ -236,7 +230,7 @@ The plots in the bottom half of the panel help you select an appropriate cutoff.
 
 # De-barcoding
 
-*Warning: the sample dataset is pretty massive. If you are having trouble debarcoding data on your machine, the debarcoding results for this tutorial are located in the XXX folder*
+*Warning: the sample dataset is pretty massive. If you are having trouble debarcoding data on your machine, the debarcoding results for this tutorial are located in the `debarcoded` folder*
 
 Barcoding (described in [this](https://www.ncbi.nlm.nih.gov/pubmed/25612231) publication) is a way to minimize staining variability across multiple samples. Each sample is labeled with a unique combination of metals before staining. All the samples are then pooled in a single tube, and stained in a single reaction, which guarantees that they are all exposed to the same amount of antibody.
 
@@ -244,7 +238,9 @@ After the data for this pooled sample is acquired, the software goes through eac
 
 It is important to note that barcoding only addresses variability that is due to staining differences. It does **not** account for variation due to instrument setup or sensitivity (you need to use [normalization](#normalization) for that)
 
-Assuming the FCS file *BM_cells.fcs* is located in the directory *Science Data*, and the barcode key defines 20 barcoded populations (1-20), the following directories and output files will be created at the end of the debarcoding process:
+In this dataset samples for each tissue where barcoded together. Each barcoded file contains 14 samples from the C57BL/6 strain, 3 from the Balb/c, and 3 from the 129S1/S (as evidenced by the file names after debarcoding)
+
+Assuming the FCS file *BM_cells_normalized_beadsremoved.fcs* is located in the `normed` directory, the following directories and output files will be created at the end of the debarcoding process:
 
 ```
 Science Data
@@ -466,7 +462,7 @@ For the purpose of tutorial we will create a single unsupervised graphs includin
 
 ```R
 # List the clustered.txt files contained in the "single_samples" directory
-input.files <- list.files(path = "clustered_single_samples", pattern = "*.clustered.txt$", full.names = TRUE)
+input.files <- list.files(path = "clustered_by_tissue", pattern = "*.clustered.txt$", full.names = TRUE)
 
 # Optional: load a table of sample-level metadata. All the nodes derived from the corresponding cluster file will
 # have vertex properties corresponding to this metadata
@@ -506,7 +502,7 @@ Also with this approach multiple samples can be processed independently because 
 
 
 
-This code snippet demonstrates how to construct scaffold maps. In this example, the data for the landmark nodes, i.e. the gated populations, are given to you in the subfolder called [gated](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets) as single FCS files (one for each population). The software will split the name of the FCS files using `"_"` as separator and the last field will be used as the population name. For instance if a file is called `foo_bar_foobar_Bcells.fcs` the corresponding population will be called `Bcells` in the scaffold analysis.
+This code snippet demonstrates how to construct scaffold maps. In this example, the data for the landmark nodes, i.e. the gated populations, are given to you in the subfolder called `landmarks` as single FCS files (one for each population). The software will split the name of the FCS files using `"_"` as separator and the last field will be used as the population name. For instance if a file is called `foo_bar_foobar_Bcells.fcs` the corresponding population will be called `Bcells` in the scaffold analysis.
 
 For the purpose of this tutorial, we will use the data clustered by pooling all the samples from the same tissue together. Therefore we will obtain a Scaffold map for each tissue. When we visualize the data with `panorama` (see below) we will also be able to visualize each sample independently
 
@@ -521,7 +517,7 @@ col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23",
     "CD138", "CD103", "IgM", "CD44", "MHCII")
 
 # Load the data for the landmarks
-landmarks.data <- vite::load_landmarks_from_dir("gated/", asinh.cofactor = 5, transform.data = T)
+landmarks.data <- vite::load_landmarks_from_dir("landmarks/", asinh.cofactor = 5, transform.data = T)
     
 # Run the analysis. By default results will be saved in a directory called "scaffold_result"
 vite::run_scaffold_analysis(input.files, ref.file = "clustered_by_tissue/BM.pooled.clustered.txt", landmarks.data, col.names)
