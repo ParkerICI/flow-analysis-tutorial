@@ -146,6 +146,7 @@ renamed
      |--- LN_cells_normalized.fcs
      |--- BLD_cells_normalized.fcs
      |--- beads_before_and_after.pdf
+     |--- beads_gates.json
      |--- beads_vs_time
           |--- BM_cells.pdf
           |--- SPL_cells.pdf
@@ -170,6 +171,7 @@ renamed
 
 - *BM_cells_normalized.fcs*: contains the normalized data, with an added parameter called *beadDist* representing the square root of the Mahalanobis distance of each event from the centroid of the beads population
 - *beads_before_and_after.pdf*: a plot of the median intensities of the beads channels before and after normalization. This plot contains a single median value per sample. Therefore it will not be informative if you are normalizing a single sample
+- *beads_gates.json*: this file contains the gates that were used to identify the beads
 - *beads_vs_time*: this folder contains a plot for each file, displaying the intensity of the beads before and after normalization as a function of time
 - *BM_cells.pdf*: a plot of the intensities of the beads channels along time, before and after normalization
 - *BM_cells_normalized_beadsremoved.fcs*: the normalized data with the beads events removed
