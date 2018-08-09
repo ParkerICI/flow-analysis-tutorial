@@ -79,7 +79,6 @@ During this tutorial, we will go through the following steps which, save for a f
   * [Unsupervised visualization](#unsupervised-visualization)
   * [Scaffold maps](#scaffold-maps)
 * [Visualization - exploring the results](#visualization---exploring-the-results)
-* [Associating cell populations with endpoints of interest](#associating-cell-populations-with-endpoints-of-interest)
 
 
 # Panel editing
@@ -479,7 +478,7 @@ input.files <- list.files(path = "clustered_single_samples", pattern = "BLD.*.cl
 
 # Optional: load a table of sample-level metadata. All the nodes derived from the corresponding cluster file will
 # have vertex properties corresponding to this metadata
-metadata.tab <- read.table("metadata_tab_unsupervised.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+metadata.tab <- read.table("metadata_tab.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
 # Define which columns contain variables that are going to be used to calculate similarities between the nodes
 col.names <- c("CD45.2", "Ly6G", "IgD", "CD11c", "F480", "CD3", "NKp46", "CD23", "CD34", "CD115", 
