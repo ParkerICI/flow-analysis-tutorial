@@ -45,7 +45,7 @@ Several tools described in this tutorial are Graphical User Interfaces (GUIs) bu
 Another general note before we start. There are two ways to invoke a function that is part of an R packages:
 * By invoking it directly
 ```R
-premsessa::normalizer_GUI()
+premessa::normalizer_GUI()
 ```
 * By loading the package first
 ```R
