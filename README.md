@@ -25,11 +25,12 @@ To install the R packages, open an R session and enter the following command lin
 ```R
 # This installs the Bioconductor flowCore package, which is used to read FCS files
 # If using a version of R >= 3.6
-source("http://bioconductor.org/biocLite.R")
-biocLite("flowCore")
-# else
 install.packages("BiocManager")
 BiocManager::install("flowCore")
+# else
+source("http://bioconductor.org/biocLite.R")
+biocLite("flowCore")
+
 
 # This installs the devtools package, which is required to install packages from github
 install.packages("devtools")
