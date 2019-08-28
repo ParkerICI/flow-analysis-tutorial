@@ -200,7 +200,7 @@ You can start the normalizer GUI by typing the following commands in your R sess
 premessa::normalizer_GUI()
 ```
 
-Select any file from the [Science dataset](https://github.com/ParkerICI/July-2018-single-cell-workshop/tree/master/Science%20datasets). The directory itself will then become the working directory for the software. 
+Select any file from the directory containing all the data you want to normalize. The directory itself will then become the working directory for the software. 
 
 The GUI contains two tabs:
 
