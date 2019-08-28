@@ -295,7 +295,7 @@ More specifically, the assignment to a specific population is performed by looki
 You can start the de-barcoding GUI by typing the following commands in your R session:
 
 ```R
-premessa::debarcoding_GUI()
+premessa::debarcoder_GUI()
 ```
 Upon launching the GUI you will have access to the following controls:
 
@@ -352,7 +352,7 @@ For the purpose of this analysis, we can imainge to use clustering two ways:
 1. Estimating the actual number of populations in the data, i.e. as much as possible get to the point where 1 cluster = 1 biological population.
 2. Using clustering exclusively as a mean to reduce the size of the data, tending to err on the side of over-clustering, i.e. setting the clustering parameters so that the algorithm will produce more clusters than there are populations in the data, with the understanding that further analysis/visualization will reveal relationships between the clusters, possibly highlighting cases where a single population has been erroneously broken up into multiple redundant clusters.
 
-In this tutorial we will apply the second approah using the [grappolo](https://github.com/ParkerICI/grappolo]) R package.
+In this tutorial we will apply the second approach using the [grappolo](https://github.com/ParkerICI/grappolo) R package.
 
 Another important point is if and how data is pooled before clustering. This choice has very important consequences for what kind of downstream analysis we can do, particularly when we try to look at statistically significant differences across multiple samples. We will discuss these differences as they arise, for now we will cluster the data three different ways:
 
